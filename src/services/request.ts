@@ -29,7 +29,6 @@ export type ApiResult<T = unknown> =
   | { res: true; data: T }
   | { res: false; message: string; code?: string | number };
 
-// Genel amaçlı request fonksiyonu - TrackSem'deki services/request.js ile aynı desen
 export const request = async <T = unknown>(
   url: string,
   method: AxiosRequestConfig["method"],
