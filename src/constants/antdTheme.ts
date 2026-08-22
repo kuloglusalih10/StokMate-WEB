@@ -17,6 +17,14 @@ const antdTheme: ThemeConfig = {
     colorBgElevated: BRAND_COLORS.white,
     fontFamily: "Inter, sans-serif",
   },
+<<<<<<< Updated upstream
+=======
+  components: {
+    Input: {
+      hoverBorderColor: BRAND_COLORS.secondary,
+    },
+  },
+>>>>>>> Stashed changes
 };
 
 export default antdTheme;

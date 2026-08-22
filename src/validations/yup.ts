@@ -36,8 +36,7 @@ Yup.setLocale({
     max: "Bu tarih ${max} tarihinden önce olmalıdır.",
   },
   boolean: {
-    isValue: "Bu alan geçerli değil.",
-    oneOf: "Bu alanı işaretlemeniz gerekiyor.",
+    isValue: "Bu alanı işaretlemeniz gerekiyor.",
   },
   array: {
     min: "En az ${min} öğe seçmelisiniz.",

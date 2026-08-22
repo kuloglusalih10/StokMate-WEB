@@ -1,6 +1,6 @@
 import axios, { type AxiosError, type AxiosRequestConfig } from "axios";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3000/v1/";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5080";
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -27,7 +27,7 @@ api.interceptors.request.use(
 
 export type ApiResult<T = unknown> =
   | { res: true; data: T }
-  | { res: false; message: string; code?: string | number };
+  | { res: false; message: string; status?: number };
 
 export const request = async <T = unknown>(
   url: string,
@@ -50,17 +50,22 @@ export const request = async <T = unknown>(
     const response = await api.request<T>(config);
     return { res: true, data: response.data };
   } catch (err) {
-    const error = err as AxiosError<{ code?: string; message?: string }>;
+    const error = err as AxiosError<unknown>;
     console.error("API Request Error:", error);
 
-    if (error.response?.data?.code === "TOKEN_EXPIRED") {
+    const status = error.response?.status;
+    const body = error.response?.data;
+    const message =
+      typeof body === "string" && body.trim().length > 0
+        ? body
+        : error.message;
+
+    if (status === 401) {
       localStorage.removeItem("token");
-      window.location.href = "/login";
-      return { res: false, message: "Session expired", code: "AUTH_ERROR" };
+      localStorage.removeItem("refreshToken");
     }
 
-    const message = error.response?.data?.message || error.message;
-    return { res: false, message, code: error.response?.status };
+    return { res: false, message, status };
   }
 };
 
