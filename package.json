@@ -13,7 +13,6 @@
     "@ant-design/icons": "^6.3.2",
     "@formkit/auto-animate": "^0.10.0",
     "@headlessui/react": "^2.2.10",
-    "@reduxjs/toolkit": "^2.12.0",
     "antd": "^6.6.1",
     "axios": "^1.19.0",
     "classnames": "^2.5.1",
@@ -24,12 +23,10 @@
     "lottie-react": "^2.4.2",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-redux": "^9.3.0",
     "react-router-dom": "^7.18.2",
     "react-toastify": "^11.1.0",
     "recharts": "^3.10.1",
-    "tailwindcss": "^4.3.3",
-    "yup": "^1.7.1"
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

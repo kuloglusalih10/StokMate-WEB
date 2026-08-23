@@ -6,7 +6,7 @@ const antdTheme: ThemeConfig = {
     colorPrimary: BRAND_COLORS.primary,
     colorText: BRAND_COLORS.secondary,
     colorTextBase: BRAND_COLORS.secondary,
-    colorTextLightSolid: BRAND_COLORS.secondary,
+    colorTextLightSolid: BRAND_COLORS.white,
     colorLink: BRAND_COLORS.secondary,
     colorLinkHover: BRAND_COLORS.accent,
     colorLinkActive: BRAND_COLORS.accent,
@@ -40,6 +40,8 @@ const antdTheme: ThemeConfig = {
       darkItemColor: "rgba(255, 255, 255, 0.75)",
       darkItemHoverColor: BRAND_COLORS.white,
       darkItemHoverBg: "rgba(255, 255, 255, 0.08)",
+      darkItemSelectedColor: BRAND_COLORS.secondary,
+      darkItemSelectedBg: BRAND_COLORS.primary,
     },
     Pagination: {
       itemActiveBg: BRAND_COLORS.secondary,

@@ -22,6 +22,7 @@ export const DIALOG_THEME = {
   token: {
     fontFamily: DIALOG_SANS,
     colorPrimary: DIALOG_COLORS.ink,
+    colorTextLightSolid: DIALOG_COLORS.card,
     colorText: DIALOG_COLORS.text,
     colorTextSecondary: DIALOG_COLORS.muted,
     colorBorder: DIALOG_COLORS.line,
