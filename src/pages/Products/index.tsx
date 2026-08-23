@@ -19,8 +19,7 @@ import NewProductDialog from "./NewProductDialog";
 
 const { Search } = Input;
 
-type SortKey = NonNullable<ProductListParams["sort"]>;
-type ChipKey = "all" | "low" | "out" | "featured" | "pasif";
+import type { SortKey, ChipKey } from "../../types/products";
 
 const COLORS = {
   ink: "#0E1116",
@@ -358,7 +357,7 @@ const Products = () => {
           size="large"
           icon={<PlusOutlined />}
           onClick={() => setNewProductDialogOpen(true)}
-          style={{ background: COLORS.teal, borderColor: COLORS.teal, color: "#FFFFFF" }}
+          style={{ background: COLORS.ink, borderColor: COLORS.ink, color: "#FFFFFF" }}
         >
           Yeni ürün ekle
         </Button>
@@ -490,6 +489,7 @@ const Products = () => {
               pageSize,
               total,
               showSizeChanger: true,
+              style: { paddingRight: 20 },
             }}
             onChange={(paginationConfig, _filters, sorter) => {
               const activeSorter = Array.isArray(sorter) ? sorter[0] : sorter;

@@ -1,19 +1,9 @@
 import { useEffect, useState } from "react";
-import { Modal, Form, Input, ConfigProvider } from "antd";
+import { Form, Input } from "antd";
 import { toast } from "react-toastify";
-import { createBrand, updateBrand, type Brand } from "../../services/brands";
-import { DIALOG_THEME, DialogCloseIcon, DialogFooter, DialogTitle, dialogChromeStyles } from "../../components/dialogTheme";
-
-type BrandFormValues = {
-  name: string;
-};
-
-type BrandFormModalProps = {
-  open: boolean;
-  brand: Brand | null;
-  onClose: () => void;
-  onSaved: (brand: Brand) => void;
-};
+import { createBrand, updateBrand } from "../../services/brands";
+import AppDialog from "../../components/AppDialog";
+import type { BrandFormValues, BrandFormModalProps } from "../../types/definitions";
 
 const BrandFormModal = ({ open, brand, onClose, onSaved }: BrandFormModalProps) => {
   const [form] = Form.useForm<BrandFormValues>();
@@ -42,33 +32,29 @@ const BrandFormModal = ({ open, brand, onClose, onSaved }: BrandFormModalProps) 
   };
 
   return (
-    <ConfigProvider theme={DIALOG_THEME}>
-      <Modal
-        open={open}
-        onCancel={onClose}
-        maskClosable={!saving}
-        closable={!saving}
-        centered
-        styles={dialogChromeStyles("70vh")}
-        closeIcon={<DialogCloseIcon />}
-        title={<DialogTitle title={isEdit ? "Markayı düzenle" : "Yeni marka ekle"} />}
-        footer={<DialogFooter onCancel={onClose} onSubmit={handleSubmit} saving={saving} submitText={isEdit ? "Kaydet" : "Ekle"} />}
-      >
-        <Form form={form} layout="vertical" disabled={saving} requiredMark={false}>
-          <Form.Item
-            name="name"
-            label="Marka adı"
-            rules={[
-              { required: true, message: "Marka adı zorunlu." },
-              { whitespace: true, message: "Marka adı boşluk olamaz." },
-            ]}
-            style={{ marginBottom: 0 }}
-          >
-            <Input size="large" autoFocus />
-          </Form.Item>
-        </Form>
-      </Modal>
-    </ConfigProvider>
+    <AppDialog
+      open={open}
+      onClose={onClose}
+      title={isEdit ? "Markayı düzenle" : "Yeni marka ekle"}
+      maxHeight="70vh"
+      saving={saving}
+      onSubmit={handleSubmit}
+      submitText={isEdit ? "Kaydet" : "Ekle"}
+    >
+      <Form form={form} layout="vertical" disabled={saving} requiredMark={false}>
+        <Form.Item
+          name="name"
+          label="Marka adı"
+          rules={[
+            { required: true, message: "Marka adı zorunlu." },
+            { whitespace: true, message: "Marka adı boşluk olamaz." },
+          ]}
+          style={{ marginBottom: 0 }}
+        >
+          <Input size="large" autoFocus />
+        </Form.Item>
+      </Form>
+    </AppDialog>
   );
 };
 

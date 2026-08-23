@@ -21,7 +21,7 @@ export const DIALOG_MONO = "'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospa
 export const DIALOG_THEME = {
   token: {
     fontFamily: DIALOG_SANS,
-    colorPrimary: DIALOG_COLORS.teal,
+    colorPrimary: DIALOG_COLORS.ink,
     colorText: DIALOG_COLORS.text,
     colorTextSecondary: DIALOG_COLORS.muted,
     colorBorder: DIALOG_COLORS.line,
@@ -31,26 +31,26 @@ export const DIALOG_THEME = {
   },
   components: {
     Input: {
-      activeBorderColor: DIALOG_COLORS.teal,
+      activeBorderColor: DIALOG_COLORS.ink,
       hoverBorderColor: "rgba(14,17,22,0.3)",
-      activeShadow: "0 0 0 3px rgba(16,99,92,0.12)",
+      activeShadow: "0 0 0 3px rgba(14,17,22,0.10)",
       inputFontSizeLG: 13.5,
       paddingBlockLG: 10,
       paddingInlineLG: 12,
     },
     InputNumber: {
-      activeBorderColor: DIALOG_COLORS.teal,
+      activeBorderColor: DIALOG_COLORS.ink,
       hoverBorderColor: "rgba(14,17,22,0.3)",
-      activeShadow: "0 0 0 3px rgba(16,99,92,0.12)",
+      activeShadow: "0 0 0 3px rgba(14,17,22,0.10)",
       inputFontSizeLG: 13.5,
       paddingBlockLG: 10,
       paddingInlineLG: 12,
     },
     Select: {
-      optionSelectedBg: DIALOG_COLORS.tealSoft,
+      optionSelectedBg: "rgba(14,17,22,0.06)",
     },
     Switch: {
-      colorPrimary: DIALOG_COLORS.teal,
+      colorPrimary: DIALOG_COLORS.ink,
     },
     Form: {
       itemMarginBottom: 0,
@@ -177,7 +177,7 @@ export const DialogFooter = ({
   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
     {requiredNote ? (
       <span style={{ fontSize: 11.5, color: DIALOG_COLORS.muted }}>
-        <span style={{ color: DIALOG_COLORS.teal }}>*</span> zorunlu alanlar
+        <span style={{ color: DIALOG_COLORS.ink }}>*</span> zorunlu alanlar
       </span>
     ) : (
       <span />
