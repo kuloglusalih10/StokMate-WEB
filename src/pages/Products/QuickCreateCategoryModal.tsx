@@ -1,18 +1,10 @@
 import { useEffect, useState } from "react";
-import { Modal, Form, Input, ColorPicker, ConfigProvider } from "antd";
+import { Form, Input, ColorPicker } from "antd";
 import { toast } from "react-toastify";
 import { createCategory, type Category } from "../../services/categories";
-import { DIALOG_COLORS, DIALOG_THEME, DialogCloseIcon, DialogFooter, DialogTitle, dialogChromeStyles } from "../../components/dialogTheme";
-
-type QuickCreateCategoryFormValues = {
-  name: string;
-};
-
-type QuickCreateCategoryModalProps = {
-  open: boolean;
-  onClose: () => void;
-  onCreated: (category: Category) => void;
-};
+import AppDialog from "../../components/AppDialog";
+import { DIALOG_COLORS } from "../../components/dialogTheme";
+import type { QuickCreateCategoryFormValues, QuickCreateCategoryModalProps } from "../../types/products";
 
 const QuickCreateCategoryModal = ({ open, onClose, onCreated }: QuickCreateCategoryModalProps) => {
   const [form] = Form.useForm<QuickCreateCategoryFormValues>();
@@ -42,37 +34,33 @@ const QuickCreateCategoryModal = ({ open, onClose, onCreated }: QuickCreateCateg
   };
 
   return (
-    <ConfigProvider theme={DIALOG_THEME}>
-      <Modal
-        open={open}
-        onCancel={onClose}
-        maskClosable={!saving}
-        closable={!saving}
-        centered
-        styles={dialogChromeStyles("70vh")}
-        closeIcon={<DialogCloseIcon />}
-        title={<DialogTitle title="Yeni kategori ekle" />}
-        footer={<DialogFooter onCancel={onClose} onSubmit={handleSubmit} saving={saving} submitText="Ekle" />}
-      >
-        <Form form={form} layout="vertical" disabled={saving} requiredMark={false}>
-          <Form.Item
-            name="name"
-            label="Kategori adı"
-            rules={[
-              { required: true, message: "Kategori adı zorunlu." },
-              { whitespace: true, message: "Kategori adı boşluk olamaz." },
-            ]}
-          >
-            <Input size="large" autoFocus />
-          </Form.Item>
+    <AppDialog
+      open={open}
+      onClose={onClose}
+      title="Yeni kategori ekle"
+      maxHeight="70vh"
+      saving={saving}
+      onSubmit={handleSubmit}
+      submitText="Ekle"
+    >
+      <Form form={form} layout="vertical" disabled={saving} requiredMark={false}>
+        <Form.Item
+          name="name"
+          label="Kategori adı"
+          rules={[
+            { required: true, message: "Kategori adı zorunlu." },
+            { whitespace: true, message: "Kategori adı boşluk olamaz." },
+          ]}
+        >
+          <Input size="large" autoFocus />
+        </Form.Item>
 
-          <Form.Item label="Renk" style={{ marginBottom: 0 }}>
-            <ColorPicker value={color} onChange={(value) => setColor(value.toHexString())} format="hex" disabledAlpha size="large" />
-            <div style={{ fontSize: 12.5, color: DIALOG_COLORS.muted, marginTop: 10 }}>Renk seçmezsen otomatik bir renk atanır.</div>
-          </Form.Item>
-        </Form>
-      </Modal>
-    </ConfigProvider>
+        <Form.Item label="Renk" style={{ marginBottom: 0 }}>
+          <ColorPicker value={color} onChange={(value) => setColor(value.toHexString())} format="hex" disabledAlpha size="large" />
+          <div style={{ fontSize: 12.5, color: DIALOG_COLORS.muted, marginTop: 10 }}>Renk seçmezsen otomatik bir renk atanır.</div>
+        </Form.Item>
+      </Form>
+    </AppDialog>
   );
 };
 

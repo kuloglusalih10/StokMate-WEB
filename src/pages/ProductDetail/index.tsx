@@ -134,10 +134,7 @@ const reveal = (mounted: boolean, delay: number) => ({
   transition: `opacity .55s cubic-bezier(.2,.7,.2,1) ${delay}s, transform .55s cubic-bezier(.2,.7,.2,1) ${delay}s`,
 });
 
-type StockTrendChartProps = {
-  history: StockHistoryPoint[];
-  minStock: number;
-};
+import type { StockTrendChartProps } from "../../types/productDetail";
 
 const StockTrendChart = ({ history, minStock }: StockTrendChartProps) => {
   if (history.length === 0) {
@@ -417,7 +414,7 @@ const ProductDetailPage = () => {
             size="large"
             icon={<PlusOutlined />}
             onClick={() => setStockDialogOpen(true)}
-            style={{ background: COLORS.teal, borderColor: COLORS.teal, color: "#FFFFFF" }}
+            style={{ background: COLORS.ink, borderColor: COLORS.ink, color: "#FFFFFF" }}
           >
             Stok girişi
           </Button>

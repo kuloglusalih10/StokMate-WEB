@@ -10,7 +10,7 @@ import CategoryFormModal from "./CategoryFormModal";
 import BrandFormModal from "./BrandFormModal";
 import SupplierFormModal from "./SupplierFormModal";
 
-type TabKey = "categories" | "brands" | "suppliers";
+import type { TabKey } from "../../types/definitions";
 
 const COLORS = {
   ink: "#0E1116",
@@ -216,7 +216,7 @@ const Definitions = () => {
             Ürün kartlarında seçilen kategori, marka ve tedarikçi listeleri. Buradaki bir kaydı değiştirmek, o kaydı kullanan tüm ürünleri etkiler.
           </p>
         </div>
-        <Button size="large" onClick={handleAddClick} style={{ background: COLORS.teal, borderColor: COLORS.teal, color: "#FFFFFF" }}>
+        <Button size="large" onClick={handleAddClick} style={{ background: COLORS.ink, borderColor: COLORS.ink, color: "#FFFFFF" }}>
           {meta.addLabel}
         </Button>
       </div>

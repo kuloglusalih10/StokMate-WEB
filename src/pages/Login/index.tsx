@@ -4,11 +4,7 @@ import { Form, Input, Button } from "antd";
 import { toast } from "react-toastify";
 import InventoryShowcase from "./components/InventoryShowcase";
 import { login } from "../../services/auth";
-
-type LoginFormValues = {
-  email: string;
-  password: string;
-};
+import type { LoginFormValues } from "../../types/login";
 
 const Login = () => {
   const navigate = useNavigate();

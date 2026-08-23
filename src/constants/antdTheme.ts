@@ -41,6 +41,11 @@ const antdTheme: ThemeConfig = {
       darkItemHoverColor: BRAND_COLORS.white,
       darkItemHoverBg: "rgba(255, 255, 255, 0.08)",
     },
+    Pagination: {
+      itemActiveBg: BRAND_COLORS.secondary,
+      colorPrimary: BRAND_COLORS.white,
+      colorPrimaryHover: BRAND_COLORS.white,
+    },
     Button: {
       defaultBorderColor: "#D9D9D9",
       defaultHoverColor: BRAND_COLORS.secondary,

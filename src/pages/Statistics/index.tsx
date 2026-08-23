@@ -8,7 +8,7 @@ import {
 } from "../../services/products";
 import StatisticsLoading from "./loading";
 
-type MatrixFilter = "saglikli" | "kritik" | "tukenen";
+import type { MatrixFilter } from "../../types/statistics";
 
 const COLORS = {
   ink: "#0E1116",
@@ -113,11 +113,7 @@ const reveal = (mounted: boolean, delay: number) => ({
   transition: `opacity .55s cubic-bezier(.2,.7,.2,1) ${delay}s, transform .55s cubic-bezier(.2,.7,.2,1) ${delay}s`,
 });
 
-type HealthMatrixRowProps = {
-  category: CategoryBreakdownItem;
-  maxCount: number;
-  filter: MatrixFilter | null;
-};
+import type { HealthMatrixRowProps } from "../../types/statistics";
 
 const HealthMatrixRow = ({ category, maxCount, filter }: HealthMatrixRowProps) => {
   const [hoveredCell, setHoveredCell] = useState<number | null>(null);
@@ -177,11 +173,7 @@ const HealthMatrixRow = ({ category, maxCount, filter }: HealthMatrixRowProps) =
   );
 };
 
-type CategoryValueChartProps = {
-  categories: { key: string; name: string; valueTL: number }[];
-  total: number;
-  mounted: boolean;
-};
+import type { CategoryValueChartProps } from "../../types/statistics";
 
 const CategoryValueChart = ({ categories, total, mounted }: CategoryValueChartProps) => {
   const [hovered, setHovered] = useState<number | null>(null);
@@ -255,10 +247,7 @@ const CategoryValueChart = ({ categories, total, mounted }: CategoryValueChartPr
   );
 };
 
-type BrandBarChartProps = {
-  brands: { key: string; name: string; count: number }[];
-  mounted: boolean;
-};
+import type { BrandBarChartProps } from "../../types/statistics";
 
 const BrandBarChart = ({ brands, mounted }: BrandBarChartProps) => {
   const [hovered, setHovered] = useState<number | null>(null);
@@ -325,10 +314,7 @@ const BrandBarChart = ({ brands, mounted }: BrandBarChartProps) => {
   );
 };
 
-type SupplierDonutProps = {
-  suppliers: { key: string; name: string; count: number }[];
-  mounted: boolean;
-};
+import type { SupplierDonutProps } from "../../types/statistics";
 
 const SupplierDonut = ({ suppliers, mounted }: SupplierDonutProps) => {
   const [hovered, setHovered] = useState<number | null>(null);

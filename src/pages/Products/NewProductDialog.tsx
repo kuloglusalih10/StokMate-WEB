@@ -1,32 +1,29 @@
 import { useEffect, useState } from "react";
-import { Modal, Form, Input, InputNumber, Select, Switch, ConfigProvider } from "antd";
+import { Form, Input, InputNumber, Select, Switch } from "antd";
 import { toast } from "react-toastify";
 import { createProduct, type Product } from "../../services/products";
 import { getCategories, type Category } from "../../services/categories";
 import { getBrands, type Brand } from "../../services/brands";
 import { getSuppliers, type Supplier } from "../../services/suppliers";
 import CreatableSelect from "../../components/CreatableSelect";
+import AppDialog from "../../components/AppDialog";
 import QuickCreateCategoryModal from "./QuickCreateCategoryModal";
 import QuickCreateBrandModal from "./QuickCreateBrandModal";
 import QuickCreateSupplierModal from "./QuickCreateSupplierModal";
 import {
   DIALOG_MONO,
-  DIALOG_THEME,
-  DialogCloseIcon,
-  DialogFooter,
   DialogSection,
   DialogSwitchRow,
-  DialogTitle,
   PRODUCT_STATUS_OPTIONS,
   PRODUCT_UNIT_OPTIONS,
   SegmentedPills,
   UnitEconomicsPanel,
-  dialogChromeStyles,
   dialogHintStyle,
   dialogTwoColStyle,
   formatDecimalDisplay,
   parseDecimalDisplay,
 } from "../../components/dialogTheme";
+import type { NewProductFormValues, NewProductDialogProps } from "../../types/products";
 
 const INITIAL_VALUES = {
   unit: 1,
@@ -36,29 +33,6 @@ const INITIAL_VALUES = {
   costPrice: 0,
   stock: 0,
   minStock: 0,
-};
-
-type NewProductFormValues = {
-  name: string;
-  sku: string;
-  barcode?: string;
-  categoryId: number;
-  brandId: number;
-  supplierId: number;
-  price: number;
-  costPrice: number;
-  stock: number;
-  minStock: number;
-  unit: number;
-  status: number;
-  description?: string;
-  isFeatured: boolean;
-};
-
-type NewProductDialogProps = {
-  open: boolean;
-  onClose: () => void;
-  onCreated: (created: Product) => void;
 };
 
 const NewProductDialog = ({ open, onClose, onCreated }: NewProductDialogProps) => {
@@ -137,18 +111,16 @@ const NewProductDialog = ({ open, onClose, onCreated }: NewProductDialogProps) =
     : "Eşik girmezsen ürün kritik stok uyarılarına dahil edilmez.";
 
   return (
-    <ConfigProvider theme={DIALOG_THEME}>
-      <Modal
+    <>
+      <AppDialog
         open={open}
-        onCancel={onClose}
-        maskClosable={!saving}
-        closable={!saving}
+        onClose={onClose}
+        title="Yeni ürün ekle"
+        subtitle="Katalog kaydı oluştur. Stok girişini sonradan da yapabilirsin."
         width={720}
-        centered
-        styles={dialogChromeStyles()}
-        closeIcon={<DialogCloseIcon />}
-        title={<DialogTitle title="Yeni ürün ekle" subtitle="Katalog kaydı oluştur. Stok girişini sonradan da yapabilirsin." />}
-        footer={<DialogFooter onCancel={onClose} onSubmit={handleSubmit} saving={saving} submitText="Ürünü ekle" />}
+        saving={saving}
+        onSubmit={handleSubmit}
+        submitText="Ürünü ekle"
       >
         <Form form={form} layout="vertical" disabled={saving} requiredMark={false} initialValues={INITIAL_VALUES}>
           <DialogSection eyebrow="Kimlik">
@@ -307,7 +279,7 @@ const NewProductDialog = ({ open, onClose, onCreated }: NewProductDialogProps) =
             </DialogSwitchRow>
           </DialogSection>
         </Form>
-      </Modal>
+      </AppDialog>
 
       <QuickCreateCategoryModal
         open={categoryModalOpen}
@@ -338,7 +310,7 @@ const NewProductDialog = ({ open, onClose, onCreated }: NewProductDialogProps) =
           setSupplierModalOpen(false);
         }}
       />
-    </ConfigProvider>
+    </>
   );
 };
 

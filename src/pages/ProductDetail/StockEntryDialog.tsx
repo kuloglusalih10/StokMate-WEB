@@ -1,20 +1,10 @@
 import { useEffect, useState } from "react";
-import { Modal, Form, InputNumber, ConfigProvider } from "antd";
+import { Form, InputNumber } from "antd";
 import { toast } from "react-toastify";
 import { addProductStockEntry } from "../../services/products";
-import { DIALOG_COLORS, DIALOG_THEME, DialogCloseIcon, DialogFooter, DialogTitle, dialogChromeStyles } from "../../components/dialogTheme";
-
-type StockEntryFormValues = {
-  quantity: number;
-};
-
-type StockEntryDialogProps = {
-  open: boolean;
-  productId: number;
-  productName: string;
-  onClose: () => void;
-  onAdded: () => void;
-};
+import AppDialog from "../../components/AppDialog";
+import { DIALOG_COLORS } from "../../components/dialogTheme";
+import type { StockEntryFormValues, StockEntryDialogProps } from "../../types/productDetail";
 
 const StockEntryDialog = ({ open, productId, productName, onClose, onAdded }: StockEntryDialogProps) => {
   const [form] = Form.useForm<StockEntryFormValues>();
@@ -42,34 +32,32 @@ const StockEntryDialog = ({ open, productId, productName, onClose, onAdded }: St
   };
 
   return (
-    <ConfigProvider theme={DIALOG_THEME}>
-      <Modal
-        open={open}
-        onCancel={onClose}
-        maskClosable={!saving}
-        closable={!saving}
-        width={420}
-        centered
-        styles={dialogChromeStyles("70vh")}
-        closeIcon={<DialogCloseIcon />}
-        title={<DialogTitle title="Stok girişi" subtitle={`"${productName}" için depoya eklenecek miktarı gir.`} />}
-        footer={<DialogFooter onCancel={onClose} onSubmit={handleSubmit} saving={saving} submitText="Girişi kaydet" requiredNote={false} />}
-      >
-        <Form form={form} layout="vertical" disabled={saving} requiredMark={false}>
-          <Form.Item
-            name="quantity"
-            label="Eklenecek miktar"
-            rules={[
-              { required: true, message: "Miktar zorunlu." },
-              { type: "number", min: 1, message: "Miktar sıfırdan büyük olmalı." },
-            ]}
-            extra={<p style={{ margin: "6px 0 0", fontSize: 11.5, color: DIALOG_COLORS.muted }}>Bu miktar mevcut stoğa eklenir.</p>}
-          >
-            <InputNumber size="large" min={1} style={{ width: "100%" }} autoFocus />
-          </Form.Item>
-        </Form>
-      </Modal>
-    </ConfigProvider>
+    <AppDialog
+      open={open}
+      onClose={onClose}
+      title="Stok girişi"
+      subtitle={`"${productName}" için depoya eklenecek miktarı gir.`}
+      width={420}
+      maxHeight="70vh"
+      saving={saving}
+      onSubmit={handleSubmit}
+      submitText="Girişi kaydet"
+      requiredNote={false}
+    >
+      <Form form={form} layout="vertical" disabled={saving} requiredMark={false}>
+        <Form.Item
+          name="quantity"
+          label="Eklenecek miktar"
+          rules={[
+            { required: true, message: "Miktar zorunlu." },
+            { type: "number", min: 1, message: "Miktar sıfırdan büyük olmalı." },
+          ]}
+          extra={<p style={{ margin: "6px 0 0", fontSize: 11.5, color: DIALOG_COLORS.muted }}>Bu miktar mevcut stoğa eklenir.</p>}
+        >
+          <InputNumber size="large" min={1} style={{ width: "100%" }} autoFocus />
+        </Form.Item>
+      </Form>
+    </AppDialog>
   );
 };
 
