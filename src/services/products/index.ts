@@ -70,6 +70,49 @@ export const getProducts = (params: ProductListParams = {}) =>
 
 export const getProductStats = () => request<ProductStats>("/products/stats", "GET");
 
+export type CategoryBreakdownItem = {
+  categoryId: number;
+  categoryName: string;
+  categoryColor: string;
+  productCount: number;
+  stockValue: number;
+};
+
+export type BrandBreakdownItem = {
+  brandId: number;
+  brandName: string;
+  productCount: number;
+};
+
+export type SupplierBreakdownItem = {
+  supplierId: number;
+  supplierName: string;
+  productCount: number;
+};
+
+export type StatusBreakdownItem = {
+  status: number;
+  count: number;
+};
+
+export type ProductStatsBreakdown = {
+  totalProducts: number;
+  totalInventoryValue: number;
+  totalCostValue: number;
+  featuredCount: number;
+  recentlyAddedCount: number;
+  healthyStockCount: number;
+  lowStockCount: number;
+  outOfStockCount: number;
+  byCategory: CategoryBreakdownItem[];
+  byBrand: BrandBreakdownItem[];
+  bySupplier: SupplierBreakdownItem[];
+  byStatus: StatusBreakdownItem[];
+};
+
+export const getProductStatsBreakdown = () =>
+  request<ProductStatsBreakdown>("/products/stats/breakdown", "GET");
+
 export const getProductById = (id: number) => request<ProductDetail>(`/products/${id}`, "GET");
 
 export const deleteProduct = (id: number) => request<void>(`/products/${id}`, "DELETE");

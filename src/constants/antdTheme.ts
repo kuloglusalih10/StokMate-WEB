@@ -37,6 +37,9 @@ const antdTheme: ThemeConfig = {
     Menu: {
       itemHeight: 48,
       fontSize: 16,
+      darkItemColor: "rgba(255, 255, 255, 0.75)",
+      darkItemHoverColor: BRAND_COLORS.white,
+      darkItemHoverBg: "rgba(255, 255, 255, 0.08)",
     },
     Button: {
       defaultBorderColor: "#D9D9D9",

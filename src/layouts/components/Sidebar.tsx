@@ -1,9 +1,19 @@
-import { Layout, Menu } from "antd";
-import { ShoppingOutlined } from "@ant-design/icons";
+import { useState } from "react";
+import { Layout, Menu, Button, ConfigProvider } from "antd";
+import { ShoppingOutlined, BarChartOutlined, SettingOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { logout } from "../../services/auth";
+import ConfirmDialog from "../../components/ConfirmDialog";
 import iconLime from "../../assets/stokmate-icon-lime.svg";
 import logoLockup from "../../assets/stokmate-lockup-duo-notagline.svg";
 import { BRAND_COLORS } from "../../constants/colors";
+
+const LOGOUT_RED = {
+  base: "#F04438",
+  hover: "#D92D20",
+  active: "#B42318",
+};
 
 const { Sider } = Layout;
 
@@ -20,16 +30,45 @@ const menuItems = [
     icon: <ShoppingOutlined style={{ fontSize: 19 }} />,
     label: "Ürünler",
   },
+  {
+    key: "/istatistikler",
+    icon: <BarChartOutlined style={{ fontSize: 19 }} />,
+    label: "İstatistikler",
+  },
+  {
+    key: "/ayarlar",
+    icon: <SettingOutlined style={{ fontSize: 19 }} />,
+    label: "Ayarlar",
+  },
 ];
 
 const Sidebar = ({ collapsed, broken, onBreakpoint, onNavigate }: SidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const selectedKey =
     menuItems.find(
       (item) => location.pathname === item.key || location.pathname.startsWith(`${item.key}/`)
     )?.key ?? location.pathname;
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    if (refreshToken) {
+      await logout(refreshToken);
+    }
+
+    setLoggingOut(false);
+    setLogoutDialogOpen(false);
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    toast.success("Çıkış yapıldı.");
+    navigate("/giris");
+  };
 
   return (
     <Sider
@@ -62,36 +101,76 @@ const Sidebar = ({ collapsed, broken, onBreakpoint, onNavigate }: SidebarProps) 
             }
       }
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          padding: "32px 24px 0",
-          marginBottom: 16,
-        }}
-      >
-        {broken ? (
-          <img src={iconLime} alt="StokMate" style={{ height: 44, width: "auto" }} />
-        ) : (
-          <img src={logoLockup} alt="StokMate" style={{ height: 42, width: "auto" }} />
-        )}
+      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-start",
+            padding: "32px 24px 0",
+            marginBottom: 16,
+          }}
+        >
+          {broken ? (
+            <img src={iconLime} alt="StokMate" style={{ height: 44, width: "auto" }} />
+          ) : (
+            <img src={logoLockup} alt="StokMate" style={{ height: 42, width: "auto" }} />
+          )}
+        </div>
+        <div style={{ flex: 1 }}>
+          <Menu
+            theme="dark"
+            mode="inline"
+            selectedKeys={[selectedKey]}
+            items={menuItems}
+            onClick={({ key }) => {
+              navigate(key);
+              onNavigate?.();
+            }}
+            style={{
+              background: BRAND_COLORS.secondary,
+              borderInlineEnd: "none",
+              fontSize: 17,
+            }}
+          />
+        </div>
+        <div style={{ padding: "16px 24px 24px" }}>
+          <ConfigProvider
+            theme={{
+              components: {
+                Button: {
+                  colorError: LOGOUT_RED.base,
+                  colorErrorHover: LOGOUT_RED.hover,
+                  colorErrorActive: LOGOUT_RED.active,
+                  dangerColor: BRAND_COLORS.white,
+                },
+              },
+            }}
+          >
+            <Button
+              type="primary"
+              danger
+              size="large"
+              block
+              icon={<LogoutOutlined />}
+              onClick={() => setLogoutDialogOpen(true)}
+            >
+              Çıkış Yap
+            </Button>
+            <ConfirmDialog
+              open={logoutDialogOpen}
+              title="Çıkış yap"
+              description="Hesabından çıkış yapmak istediğine emin misin?"
+              confirmText="Çıkış Yap"
+              cancelText="Vazgeç"
+              danger
+              loading={loggingOut}
+              onConfirm={handleLogout}
+              onCancel={() => setLogoutDialogOpen(false)}
+            />
+          </ConfigProvider>
+        </div>
       </div>
-      <Menu
-        theme="dark"
-        mode="inline"
-        selectedKeys={[selectedKey]}
-        items={menuItems}
-        onClick={({ key }) => {
-          navigate(key);
-          onNavigate?.();
-        }}
-        style={{
-          background: BRAND_COLORS.secondary,
-          borderInlineEnd: "none",
-          fontSize: 17,
-        }}
-      />
     </Sider>
   );
 };
