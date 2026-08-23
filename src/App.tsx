@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import store from "./stores";
 import AppRoutes from "./routes";
 import antdTheme from "./constants/antdTheme";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
   return (
@@ -14,7 +15,9 @@ function App() {
       <ConfigProvider locale={trTR} theme={antdTheme}>
         <BrowserRouter>
           <ToastContainer />
-          <AppRoutes />
+          <ErrorBoundary>
+            <AppRoutes />
+          </ErrorBoundary>
         </BrowserRouter>
       </ConfigProvider>
     </Provider>
