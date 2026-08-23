@@ -63,6 +63,11 @@ export const request = async <T = unknown>(
     if (status === 401) {
       localStorage.removeItem("token");
       localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+
+      if (window.location.pathname !== "/giris") {
+        window.location.assign("/giris");
+      }
     }
 
     return { res: false, message, status };

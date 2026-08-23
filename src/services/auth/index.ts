@@ -20,3 +20,8 @@ export type LoginPayload = {
 
 export const login = (payload: LoginPayload) =>
   request<LoginResponse>("/auth/login", "POST", payload);
+
+export const logout = (refreshToken: string) =>
+  request<void>("/auth/logout", "POST", { refreshToken });
+
+export const getMe = () => request<LoginUser>("/auth/me", "GET");

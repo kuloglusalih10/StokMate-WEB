@@ -31,7 +31,7 @@ const Login = () => {
     localStorage.setItem("user", JSON.stringify(result.data.user));
 
     toast.success(`Hoş geldiniz, ${result.data.user.fullName}`);
-    navigate("/");
+    navigate("/urunler");
   };
 
   return (
