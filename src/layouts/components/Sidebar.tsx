@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Layout, Menu, Button, ConfigProvider } from "antd";
-import { ShoppingOutlined, BarChartOutlined, SettingOutlined, LogoutOutlined } from "@ant-design/icons";
+import { InboxOutlined, BarChartOutlined, SettingOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { logout } from "../../services/auth";
@@ -24,29 +24,31 @@ type SidebarProps = {
   onNavigate?: () => void;
 };
 
-const menuItems = [
-  {
-    key: "/urunler",
-    icon: <ShoppingOutlined style={{ fontSize: 19 }} />,
-    label: "Ürünler",
-  },
-  {
-    key: "/istatistikler",
-    icon: <BarChartOutlined style={{ fontSize: 19 }} />,
-    label: "İstatistikler",
-  },
-  {
-    key: "/definitions",
-    icon: <SettingOutlined style={{ fontSize: 19 }} />,
-    label: "Tanımlar",
-  },
-];
-
 const Sidebar = ({ collapsed, broken, onBreakpoint, onNavigate }: SidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+
+  const showIconOnly = collapsed && !broken;
+
+  const menuItems = [
+    {
+      key: "/urunler",
+      icon: <InboxOutlined />,
+      label: "Ürünler",
+    },
+    {
+      key: "/istatistikler",
+      icon: <BarChartOutlined />,
+      label: "İstatistikler",
+    },
+    {
+      key: "/definitions",
+      icon: <SettingOutlined />,
+      label: "Tanımlar",
+    },
+  ];
 
   const selectedKey =
     menuItems.find(
@@ -73,7 +75,7 @@ const Sidebar = ({ collapsed, broken, onBreakpoint, onNavigate }: SidebarProps) 
   return (
     <Sider
       breakpoint="lg"
-      collapsedWidth={0}
+      collapsedWidth={broken ? 0 : 72}
       trigger={null}
       collapsed={collapsed}
       onBreakpoint={onBreakpoint}
@@ -106,13 +108,13 @@ const Sidebar = ({ collapsed, broken, onBreakpoint, onNavigate }: SidebarProps) 
           style={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "flex-start",
-            padding: "32px 24px 0",
+            justifyContent: showIconOnly ? "center" : "flex-start",
+            padding: showIconOnly ? "32px 0 0" : "32px 24px 0",
             marginBottom: 16,
           }}
         >
-          {broken ? (
-            <img src={iconLime} alt="StokMate" style={{ height: 44, width: "auto" }} />
+          {showIconOnly || broken ? (
+            <img src={iconLime} alt="StokMate" style={{ height: 36, width: "auto" }} />
           ) : (
             <img src={logoLockup} alt="StokMate" style={{ height: 42, width: "auto" }} />
           )}
@@ -121,6 +123,7 @@ const Sidebar = ({ collapsed, broken, onBreakpoint, onNavigate }: SidebarProps) 
           <Menu
             theme="dark"
             mode="inline"
+            inlineCollapsed={collapsed && !broken}
             selectedKeys={[selectedKey]}
             items={menuItems}
             onClick={({ key }) => {
@@ -130,11 +133,10 @@ const Sidebar = ({ collapsed, broken, onBreakpoint, onNavigate }: SidebarProps) 
             style={{
               background: BRAND_COLORS.secondary,
               borderInlineEnd: "none",
-              fontSize: 17,
             }}
           />
         </div>
-        <div style={{ padding: "16px 24px 24px" }}>
+        <div style={{ padding: showIconOnly ? "16px 12px 24px" : "16px 24px 24px" }}>
           <ConfigProvider
             theme={{
               components: {
@@ -147,16 +149,28 @@ const Sidebar = ({ collapsed, broken, onBreakpoint, onNavigate }: SidebarProps) 
               },
             }}
           >
-            <Button
-              type="primary"
-              danger
-              size="large"
-              block
-              icon={<LogoutOutlined />}
-              onClick={() => setLogoutDialogOpen(true)}
-            >
-              Çıkış Yap
-            </Button>
+            {showIconOnly ? (
+              <Button
+                type="primary"
+                danger
+                size="large"
+                block
+                icon={<LogoutOutlined />}
+                onClick={() => setLogoutDialogOpen(true)}
+                style={{ padding: 0 }}
+              />
+            ) : (
+              <Button
+                type="primary"
+                danger
+                size="large"
+                block
+                icon={<LogoutOutlined />}
+                onClick={() => setLogoutDialogOpen(true)}
+              >
+                Çıkış Yap
+              </Button>
+            )}
             <ConfirmDialog
               open={logoutDialogOpen}
               title="Çıkış yap"

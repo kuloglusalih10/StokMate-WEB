@@ -37,6 +37,8 @@ const antdTheme: ThemeConfig = {
     Menu: {
       itemHeight: 48,
       fontSize: 16,
+      iconSize: 22,
+      collapsedIconSize: 24,
       darkItemColor: "rgba(255, 255, 255, 0.75)",
       darkItemHoverColor: BRAND_COLORS.white,
       darkItemHoverBg: "rgba(255, 255, 255, 0.08)",
