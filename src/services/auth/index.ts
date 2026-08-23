@@ -21,6 +21,9 @@ export type LoginPayload = {
 export const login = (payload: LoginPayload) =>
   request<LoginResponse>("/auth/login", "POST", payload);
 
+export const refresh = (refreshToken: string) =>
+  request<LoginResponse>("/auth/refresh", "POST", { refreshToken });
+
 export const logout = (refreshToken: string) =>
   request<void>("/auth/logout", "POST", { refreshToken });
 
