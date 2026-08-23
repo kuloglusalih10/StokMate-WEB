@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { Table, Input, Select, Tag, Avatar } from "antd";
+import { useNavigate } from "react-router-dom";
+import { Table, Input, Select, Tag, Avatar, Button } from "antd";
 import type { TableProps } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 import {
   getProducts,
   getProductStats,
@@ -14,6 +16,7 @@ import { toast } from "react-toastify";
 import { BRAND_COLORS } from "../../constants/colors";
 import StatsCards from "./components/StatsCards";
 import { ProductsTableSkeleton } from "./loading";
+import NewProductDialog from "./NewProductDialog";
 
 const { Search } = Input;
 
@@ -55,6 +58,7 @@ const CategoryDot = ({ color }: { color: string }) => (
 );
 
 const Products = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -70,6 +74,8 @@ const Products = () => {
   const [pageSize, setPageSize] = useState(20);
   const [sortField, setSortField] = useState<SortKey | undefined>(undefined);
   const [sortDir, setSortDir] = useState<ProductListParams["dir"]>(undefined);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [newProductDialogOpen, setNewProductDialogOpen] = useState(false);
 
   const getSortOrder = (key: SortKey): "ascend" | "descend" | null => {
     if (sortField !== key) return null;
@@ -106,7 +112,7 @@ const Products = () => {
 
     loadFilters();
     loadStats();
-  }, []);
+  }, [refreshKey]);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -133,7 +139,7 @@ const Products = () => {
     };
 
     loadProducts();
-  }, [search, categoryId, brandId, page, pageSize, sortField, sortDir]);
+  }, [search, categoryId, brandId, page, pageSize, sortField, sortDir, refreshKey]);
 
   const columns: TableProps<Product>["columns"] = [
     {
@@ -232,9 +238,28 @@ const Products = () => {
 
   return (
     <div>
-      <h2 style={{ margin: "0 0 24px", fontSize: 28, fontWeight: 800, color: BRAND_COLORS.secondary }}>
-        Ürünler
-      </h2>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 12,
+          marginBottom: 24,
+        }}
+      >
+        <h2 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: BRAND_COLORS.secondary }}>
+          Ürünler
+        </h2>
+        <Button
+          type="primary"
+          size="large"
+          icon={<PlusOutlined />}
+          onClick={() => setNewProductDialogOpen(true)}
+        >
+          Yeni Ürün Ekle
+        </Button>
+      </div>
       <StatsCards stats={stats} loading={statsLoading} />
       <div
         style={{
@@ -299,6 +324,10 @@ const Products = () => {
           showSorterTooltip={false}
           scroll={{ x: 1010 }}
           style={{ fontSize: 15 }}
+          onRow={(record) => ({
+            onClick: () => navigate(`/urunler/${record.id}`),
+            style: { cursor: "pointer" },
+          })}
           pagination={{
             current: page,
             pageSize,
@@ -330,6 +359,16 @@ const Products = () => {
           }}
         />
       )}
+
+      <NewProductDialog
+        open={newProductDialogOpen}
+        onClose={() => setNewProductDialogOpen(false)}
+        onCreated={() => {
+          setNewProductDialogOpen(false);
+          setPage(1);
+          setRefreshKey((key) => key + 1);
+        }}
+      />
     </div>
   );
 };

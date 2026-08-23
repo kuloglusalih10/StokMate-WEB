@@ -9,3 +9,11 @@ export type Category = {
 };
 
 export const getCategories = () => request<Category[]>("/categories", "GET");
+
+export type CreateCategoryPayload = {
+  name: string;
+  color?: string;
+};
+
+export const createCategory = (payload: CreateCategoryPayload) =>
+  request<Category>("/categories", "POST", payload);

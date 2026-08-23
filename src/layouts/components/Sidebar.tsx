@@ -26,6 +26,11 @@ const Sidebar = ({ collapsed, broken, onBreakpoint, onNavigate }: SidebarProps) 
   const location = useLocation();
   const navigate = useNavigate();
 
+  const selectedKey =
+    menuItems.find(
+      (item) => location.pathname === item.key || location.pathname.startsWith(`${item.key}/`)
+    )?.key ?? location.pathname;
+
   return (
     <Sider
       breakpoint="lg"
@@ -75,7 +80,7 @@ const Sidebar = ({ collapsed, broken, onBreakpoint, onNavigate }: SidebarProps) 
       <Menu
         theme="dark"
         mode="inline"
-        selectedKeys={[location.pathname]}
+        selectedKeys={[selectedKey]}
         items={menuItems}
         onClick={({ key }) => {
           navigate(key);
