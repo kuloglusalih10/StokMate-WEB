@@ -1,36 +1,38 @@
 import { useEffect, useState } from "react";
-import { Modal, Form, Input, Button, ColorPicker } from "antd";
-import { TagsOutlined } from "@ant-design/icons";
+import { Modal, Form, Input, Button } from "antd";
+import { ShopOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
-import { createCategory, type Category } from "../../services/categories";
+import { createBrand, updateBrand, type Brand } from "../../services/brands";
 import { BRAND_COLORS } from "../../constants/colors";
 
-type QuickCreateCategoryFormValues = {
+type BrandFormValues = {
   name: string;
 };
 
-type QuickCreateCategoryModalProps = {
+type BrandFormModalProps = {
   open: boolean;
+  brand: Brand | null;
   onClose: () => void;
-  onCreated: (category: Category) => void;
+  onSaved: (brand: Brand) => void;
 };
 
-const QuickCreateCategoryModal = ({ open, onClose, onCreated }: QuickCreateCategoryModalProps) => {
-  const [form] = Form.useForm<QuickCreateCategoryFormValues>();
-  const [color, setColor] = useState<string | null>(null);
+const BrandFormModal = ({ open, brand, onClose, onSaved }: BrandFormModalProps) => {
+  const [form] = Form.useForm<BrandFormValues>();
   const [saving, setSaving] = useState(false);
+  const isEdit = Boolean(brand);
 
   useEffect(() => {
     if (!open) return;
-    form.resetFields();
-    setColor(null);
-  }, [open, form]);
+    form.setFieldsValue({ name: brand?.name ?? "" });
+  }, [open, brand, form]);
 
   const handleSubmit = async () => {
     const values = await form.validateFields();
 
     setSaving(true);
-    const result = await createCategory({ name: values.name, color: color ?? undefined });
+    const result = brand
+      ? await updateBrand(brand.id, { name: values.name })
+      : await createBrand({ name: values.name });
     setSaving(false);
 
     if (!result.res) {
@@ -38,8 +40,8 @@ const QuickCreateCategoryModal = ({ open, onClose, onCreated }: QuickCreateCateg
       return;
     }
 
-    toast.success("Kategori eklendi.");
-    onCreated(result.data);
+    toast.success(isEdit ? "Marka güncellendi." : "Marka eklendi.");
+    onSaved(result.data);
   };
 
   return (
@@ -65,9 +67,11 @@ const QuickCreateCategoryModal = ({ open, onClose, onCreated }: QuickCreateCateg
               flex: "0 0 auto",
             }}
           >
-            <TagsOutlined />
+            <ShopOutlined />
           </span>
-          <span style={{ fontSize: 16, fontWeight: 700, color: BRAND_COLORS.secondary }}>Yeni kategori ekle</span>
+          <span style={{ fontSize: 16, fontWeight: 700, color: BRAND_COLORS.secondary }}>
+            {isEdit ? "Markayı düzenle" : "Yeni marka ekle"}
+          </span>
         </div>
       }
       footer={[
@@ -75,37 +79,24 @@ const QuickCreateCategoryModal = ({ open, onClose, onCreated }: QuickCreateCateg
           Vazgeç
         </Button>,
         <Button key="submit" type="primary" size="large" loading={saving} onClick={handleSubmit}>
-          Ekle
+          {isEdit ? "Kaydet" : "Ekle"}
         </Button>,
       ]}
     >
       <Form form={form} layout="vertical" disabled={saving} requiredMark={false} style={{ marginTop: 12 }}>
         <Form.Item
           name="name"
-          label="Kategori adı"
+          label="Marka adı"
           rules={[
-            { required: true, message: "Kategori adı zorunlu." },
-            { whitespace: true, message: "Kategori adı boşluk olamaz." },
+            { required: true, message: "Marka adı zorunlu." },
+            { whitespace: true, message: "Marka adı boşluk olamaz." },
           ]}
         >
           <Input size="large" autoFocus />
-        </Form.Item>
-
-        <Form.Item label="Renk">
-          <ColorPicker
-            value={color}
-            onChange={(value) => setColor(value.toHexString())}
-            format="hex"
-            disabledAlpha
-            size="large"
-          />
-          <div style={{ fontSize: 12.5, color: "#ADADAD", marginTop: 10 }}>
-            Renk seçmezsen otomatik bir renk atanır.
-          </div>
         </Form.Item>
       </Form>
     </Modal>
   );
 };
 
-export default QuickCreateCategoryModal;
+export default BrandFormModal;

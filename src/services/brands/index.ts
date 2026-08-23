@@ -13,3 +13,10 @@ export type CreateBrandPayload = {
 
 export const createBrand = (payload: CreateBrandPayload) =>
   request<Brand>("/brands", "POST", payload);
+
+export type UpdateBrandPayload = {
+  name: string;
+};
+
+export const updateBrand = (id: number, payload: UpdateBrandPayload) =>
+  request<Brand>(`/brands/${id}`, "PUT", payload);

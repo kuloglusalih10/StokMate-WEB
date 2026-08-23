@@ -2,35 +2,39 @@ import { useEffect, useState } from "react";
 import { Modal, Form, Input, Button, ColorPicker } from "antd";
 import { TagsOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
-import { createCategory, type Category } from "../../services/categories";
+import { createCategory, updateCategory, type Category } from "../../services/categories";
 import { BRAND_COLORS } from "../../constants/colors";
 
-type QuickCreateCategoryFormValues = {
+type CategoryFormValues = {
   name: string;
 };
 
-type QuickCreateCategoryModalProps = {
+type CategoryFormModalProps = {
   open: boolean;
+  category: Category | null;
   onClose: () => void;
-  onCreated: (category: Category) => void;
+  onSaved: (category: Category) => void;
 };
 
-const QuickCreateCategoryModal = ({ open, onClose, onCreated }: QuickCreateCategoryModalProps) => {
-  const [form] = Form.useForm<QuickCreateCategoryFormValues>();
+const CategoryFormModal = ({ open, category, onClose, onSaved }: CategoryFormModalProps) => {
+  const [form] = Form.useForm<CategoryFormValues>();
   const [color, setColor] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const isEdit = Boolean(category);
 
   useEffect(() => {
     if (!open) return;
-    form.resetFields();
-    setColor(null);
-  }, [open, form]);
+    form.setFieldsValue({ name: category?.name ?? "" });
+    setColor(category?.color ?? null);
+  }, [open, category, form]);
 
   const handleSubmit = async () => {
     const values = await form.validateFields();
 
     setSaving(true);
-    const result = await createCategory({ name: values.name, color: color ?? undefined });
+    const result = category
+      ? await updateCategory(category.id, { name: values.name, color: color ?? category.color })
+      : await createCategory({ name: values.name, color: color ?? undefined });
     setSaving(false);
 
     if (!result.res) {
@@ -38,8 +42,8 @@ const QuickCreateCategoryModal = ({ open, onClose, onCreated }: QuickCreateCateg
       return;
     }
 
-    toast.success("Kategori eklendi.");
-    onCreated(result.data);
+    toast.success(isEdit ? "Kategori güncellendi." : "Kategori eklendi.");
+    onSaved(result.data);
   };
 
   return (
@@ -67,7 +71,9 @@ const QuickCreateCategoryModal = ({ open, onClose, onCreated }: QuickCreateCateg
           >
             <TagsOutlined />
           </span>
-          <span style={{ fontSize: 16, fontWeight: 700, color: BRAND_COLORS.secondary }}>Yeni kategori ekle</span>
+          <span style={{ fontSize: 16, fontWeight: 700, color: BRAND_COLORS.secondary }}>
+            {isEdit ? "Kategoriyi düzenle" : "Yeni kategori ekle"}
+          </span>
         </div>
       }
       footer={[
@@ -75,7 +81,7 @@ const QuickCreateCategoryModal = ({ open, onClose, onCreated }: QuickCreateCateg
           Vazgeç
         </Button>,
         <Button key="submit" type="primary" size="large" loading={saving} onClick={handleSubmit}>
-          Ekle
+          {isEdit ? "Kaydet" : "Ekle"}
         </Button>,
       ]}
     >
@@ -100,7 +106,7 @@ const QuickCreateCategoryModal = ({ open, onClose, onCreated }: QuickCreateCateg
             size="large"
           />
           <div style={{ fontSize: 12.5, color: "#ADADAD", marginTop: 10 }}>
-            Renk seçmezsen otomatik bir renk atanır.
+            {isEdit ? "Kategorinin rengini değiştirmek için istediğin bir renk seç." : "Renk seçmezsen otomatik bir renk atanır."}
           </div>
         </Form.Item>
       </Form>
@@ -108,4 +114,4 @@ const QuickCreateCategoryModal = ({ open, onClose, onCreated }: QuickCreateCateg
   );
 };
 
-export default QuickCreateCategoryModal;
+export default CategoryFormModal;
