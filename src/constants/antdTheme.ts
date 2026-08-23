@@ -20,6 +20,17 @@ const antdTheme: ThemeConfig = {
   components: {
     Input: {
       hoverBorderColor: BRAND_COLORS.secondary,
+      activeBorderColor: BRAND_COLORS.secondary,
+      activeShadow: "0 0 0 2px rgba(14, 15, 12, 0.12)",
+    },
+    Select: {
+      hoverBorderColor: BRAND_COLORS.secondary,
+      activeBorderColor: BRAND_COLORS.secondary,
+      activeOutlineColor: "rgba(14, 15, 12, 0.12)",
+    },
+    Menu: {
+      itemHeight: 48,
+      fontSize: 16,
     },
   },
 };
