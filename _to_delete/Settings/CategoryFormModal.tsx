@@ -1,35 +1,39 @@
 import { useEffect, useState } from "react";
 import { Modal, Form, Input, ColorPicker, ConfigProvider } from "antd";
 import { toast } from "react-toastify";
-import { createCategory, type Category } from "../../services/categories";
+import { createCategory, updateCategory, type Category } from "../../services/categories";
 import { DIALOG_COLORS, DIALOG_THEME, DialogCloseIcon, DialogFooter, DialogTitle, dialogChromeStyles } from "../../components/dialogTheme";
 
-type QuickCreateCategoryFormValues = {
+type CategoryFormValues = {
   name: string;
 };
 
-type QuickCreateCategoryModalProps = {
+type CategoryFormModalProps = {
   open: boolean;
+  category: Category | null;
   onClose: () => void;
-  onCreated: (category: Category) => void;
+  onSaved: (category: Category) => void;
 };
 
-const QuickCreateCategoryModal = ({ open, onClose, onCreated }: QuickCreateCategoryModalProps) => {
-  const [form] = Form.useForm<QuickCreateCategoryFormValues>();
+const CategoryFormModal = ({ open, category, onClose, onSaved }: CategoryFormModalProps) => {
+  const [form] = Form.useForm<CategoryFormValues>();
   const [color, setColor] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const isEdit = Boolean(category);
 
   useEffect(() => {
     if (!open) return;
-    form.resetFields();
-    setColor(null);
-  }, [open, form]);
+    form.setFieldsValue({ name: category?.name ?? "" });
+    setColor(category?.color ?? null);
+  }, [open, category, form]);
 
   const handleSubmit = async () => {
     const values = await form.validateFields();
 
     setSaving(true);
-    const result = await createCategory({ name: values.name, color: color ?? undefined });
+    const result = category
+      ? await updateCategory(category.id, { name: values.name, color: color ?? category.color })
+      : await createCategory({ name: values.name, color: color ?? undefined });
     setSaving(false);
 
     if (!result.res) {
@@ -37,8 +41,8 @@ const QuickCreateCategoryModal = ({ open, onClose, onCreated }: QuickCreateCateg
       return;
     }
 
-    toast.success("Kategori eklendi.");
-    onCreated(result.data);
+    toast.success(isEdit ? "Kategori güncellendi." : "Kategori eklendi.");
+    onSaved(result.data);
   };
 
   return (
@@ -51,8 +55,8 @@ const QuickCreateCategoryModal = ({ open, onClose, onCreated }: QuickCreateCateg
         centered
         styles={dialogChromeStyles("70vh")}
         closeIcon={<DialogCloseIcon />}
-        title={<DialogTitle title="Yeni kategori ekle" />}
-        footer={<DialogFooter onCancel={onClose} onSubmit={handleSubmit} saving={saving} submitText="Ekle" />}
+        title={<DialogTitle title={isEdit ? "Kategoriyi düzenle" : "Yeni kategori ekle"} />}
+        footer={<DialogFooter onCancel={onClose} onSubmit={handleSubmit} saving={saving} submitText={isEdit ? "Kaydet" : "Ekle"} />}
       >
         <Form form={form} layout="vertical" disabled={saving} requiredMark={false}>
           <Form.Item
@@ -68,7 +72,9 @@ const QuickCreateCategoryModal = ({ open, onClose, onCreated }: QuickCreateCateg
 
           <Form.Item label="Renk" style={{ marginBottom: 0 }}>
             <ColorPicker value={color} onChange={(value) => setColor(value.toHexString())} format="hex" disabledAlpha size="large" />
-            <div style={{ fontSize: 12.5, color: DIALOG_COLORS.muted, marginTop: 10 }}>Renk seçmezsen otomatik bir renk atanır.</div>
+            <div style={{ fontSize: 12.5, color: DIALOG_COLORS.muted, marginTop: 10 }}>
+              {isEdit ? "Kategorinin rengini değiştirmek için istediğin bir renk seç." : "Renk seçmezsen otomatik bir renk atanır."}
+            </div>
           </Form.Item>
         </Form>
       </Modal>
@@ -76,4 +82,4 @@ const QuickCreateCategoryModal = ({ open, onClose, onCreated }: QuickCreateCateg
   );
 };
 
-export default QuickCreateCategoryModal;
+export default CategoryFormModal;

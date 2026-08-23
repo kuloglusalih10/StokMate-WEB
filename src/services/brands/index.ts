@@ -3,6 +3,7 @@ import { request } from "../request";
 export type Brand = {
   id: number;
   name: string;
+  productCount: number;
 };
 
 export const getBrands = () => request<Brand[]>("/brands", "GET");

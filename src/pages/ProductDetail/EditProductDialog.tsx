@@ -1,25 +1,28 @@
 import { useEffect, useState } from "react";
-import { Modal, Form, Input, InputNumber, Select, Switch, Button } from "antd";
-import { EditOutlined } from "@ant-design/icons";
+import { Modal, Form, Input, InputNumber, Select, Switch, ConfigProvider } from "antd";
 import { toast } from "react-toastify";
 import { getProductById, updateProduct, type ProductDetail } from "../../services/products";
 import { getCategories, type Category } from "../../services/categories";
 import { getBrands, type Brand } from "../../services/brands";
 import { getSuppliers, type Supplier } from "../../services/suppliers";
-import { BRAND_COLORS } from "../../constants/colors";
-
-const UNIT_OPTIONS = [
-  { value: 1, label: "Adet" },
-  { value: 2, label: "Kg" },
-  { value: 3, label: "Lt" },
-  { value: 4, label: "Paket" },
-];
-
-const STATUS_OPTIONS = [
-  { value: 1, label: "Aktif" },
-  { value: 2, label: "Pasif" },
-  { value: 3, label: "Üretim Durduruldu" },
-];
+import {
+  DIALOG_MONO,
+  DIALOG_THEME,
+  DialogCloseIcon,
+  DialogFooter,
+  DialogSection,
+  DialogSwitchRow,
+  DialogTitle,
+  PRODUCT_STATUS_OPTIONS,
+  PRODUCT_UNIT_OPTIONS,
+  SegmentedPills,
+  UnitEconomicsPanel,
+  dialogChromeStyles,
+  dialogHintStyle,
+  dialogTwoColStyle,
+  formatDecimalDisplay,
+  parseDecimalDisplay,
+} from "../../components/dialogTheme";
 
 type EditProductFormValues = {
   name: string;
@@ -52,6 +55,10 @@ const EditProductDialog = ({ open, product, onClose, onUpdated }: EditProductDia
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [optionsLoading, setOptionsLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const priceValue = Form.useWatch("price", form);
+  const costPriceValue = Form.useWatch("costPrice", form);
+  const minStockValue = Form.useWatch("minStock", form);
 
   useEffect(() => {
     if (!open) return;
@@ -129,130 +136,180 @@ const EditProductDialog = ({ open, product, onClose, onUpdated }: EditProductDia
     onUpdated(detailResult.data);
   };
 
+  const price = priceValue ?? 0;
+  const cost = costPriceValue ?? 0;
+
+  const thresholdHint = minStockValue
+    ? `Stok ${minStockValue} adedin altına düşünce ürün kritik listesine girer.`
+    : "Eşik girmezsen ürün kritik stok uyarılarına dahil edilmez.";
+
   return (
-    <Modal
-      open={open}
-      onCancel={onClose}
-      maskClosable={!saving}
-      closable={!saving}
-      width={680}
-      centered
-      title={
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span
-            style={{
-              width: 38,
-              height: 38,
-              borderRadius: 11,
-              background: "rgba(215, 254, 71, 0.35)",
-              color: BRAND_COLORS.secondary,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 18,
-              flex: "0 0 auto",
-            }}
-          >
-            <EditOutlined />
-          </span>
-          <span style={{ fontSize: 16, fontWeight: 700, color: BRAND_COLORS.secondary }}>Ürünü düzenle</span>
-        </div>
-      }
-      footer={[
-        <Button key="cancel" size="large" disabled={saving} onClick={onClose}>
-          Vazgeç
-        </Button>,
-        <Button key="submit" type="primary" size="large" loading={saving} onClick={handleSubmit}>
-          Kaydet
-        </Button>,
-      ]}
-    >
-      <Form form={form} layout="vertical" disabled={saving} requiredMark={false} style={{ marginTop: 12 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
-          <Form.Item
-            name="name"
-            label="Ürün adı"
-            rules={[{ required: true, message: "Ürün adı zorunlu." }]}
-            style={{ gridColumn: "1 / -1" }}
-          >
-            <Input size="large" />
-          </Form.Item>
+    <ConfigProvider theme={DIALOG_THEME}>
+      <Modal
+        open={open}
+        onCancel={onClose}
+        maskClosable={!saving}
+        closable={!saving}
+        width={720}
+        centered
+        styles={dialogChromeStyles()}
+        closeIcon={<DialogCloseIcon />}
+        title={<DialogTitle title="Ürünü düzenle" subtitle={`"${product.name}" için katalog kaydını güncelle.`} />}
+        footer={<DialogFooter onCancel={onClose} onSubmit={handleSubmit} saving={saving} submitText="Kaydet" />}
+      >
+        <Form form={form} layout="vertical" disabled={saving} requiredMark={false}>
+          <DialogSection eyebrow="Kimlik">
+            <Form.Item
+              name="name"
+              label="Ürün adı"
+              rules={[
+                { required: true, message: "Ürün adı zorunlu." },
+                { whitespace: true, message: "Ürün adı boşluk olamaz." },
+              ]}
+              style={{ marginBottom: 14 }}
+            >
+              <Input size="large" />
+            </Form.Item>
+            <div style={dialogTwoColStyle}>
+              <Form.Item
+                name="sku"
+                label="SKU"
+                rules={[
+                  { required: true, message: "SKU zorunlu." },
+                  { whitespace: true, message: "SKU boşluk olamaz." },
+                ]}
+              >
+                <Input size="large" style={{ fontFamily: DIALOG_MONO }} />
+              </Form.Item>
+              <Form.Item name="barcode" label="Barkod">
+                <Input size="large" style={{ fontFamily: DIALOG_MONO }} />
+              </Form.Item>
+            </div>
+          </DialogSection>
 
-          <Form.Item name="sku" label="SKU" rules={[{ required: true, message: "SKU zorunlu." }]}>
-            <Input size="large" />
-          </Form.Item>
+          <DialogSection eyebrow="Sınıflandırma">
+            <div style={{ ...dialogTwoColStyle, marginBottom: 14 }}>
+              <Form.Item name="categoryId" label="Kategori" rules={[{ required: true, message: "Kategori zorunlu." }]}>
+                <Select
+                  size="large"
+                  loading={optionsLoading}
+                  options={categories.map((category) => ({ label: category.name, value: category.id }))}
+                />
+              </Form.Item>
+              <Form.Item name="brandId" label="Marka" rules={[{ required: true, message: "Marka zorunlu." }]}>
+                <Select
+                  size="large"
+                  loading={optionsLoading}
+                  options={brands.map((brand) => ({ label: brand.name, value: brand.id }))}
+                />
+              </Form.Item>
+            </div>
+            <div style={dialogTwoColStyle}>
+              <Form.Item name="supplierId" label="Tedarikçi" rules={[{ required: true, message: "Tedarikçi zorunlu." }]}>
+                <Select
+                  size="large"
+                  loading={optionsLoading}
+                  options={suppliers.map((supplier) => ({ label: supplier.name, value: supplier.id }))}
+                />
+              </Form.Item>
+              <Form.Item name="unit" label="Birim" rules={[{ required: true, message: "Birim zorunlu." }]}>
+                <Select size="large" options={PRODUCT_UNIT_OPTIONS} />
+              </Form.Item>
+            </div>
+          </DialogSection>
 
-          <Form.Item name="barcode" label="Barkod">
-            <Input size="large" />
-          </Form.Item>
+          <DialogSection eyebrow="Fiyatlandırma">
+            <div style={dialogTwoColStyle}>
+              <Form.Item
+                name="price"
+                label="Satış fiyatı"
+                rules={[
+                  { required: true, message: "Satış fiyatı zorunlu." },
+                  { type: "number", min: 0, message: "Satış fiyatı negatif olamaz." },
+                ]}
+              >
+                <InputNumber
+                  size="large"
+                  min={0}
+                  step={0.01}
+                  precision={2}
+                  prefix="₺"
+                  style={{ width: "100%" }}
+                  formatter={formatDecimalDisplay}
+                  parser={parseDecimalDisplay}
+                />
+              </Form.Item>
+              <Form.Item
+                name="costPrice"
+                label="Alış maliyeti"
+                rules={[
+                  { required: true, message: "Maliyet zorunlu." },
+                  { type: "number", min: 0, message: "Maliyet negatif olamaz." },
+                ]}
+              >
+                <InputNumber
+                  size="large"
+                  min={0}
+                  step={0.01}
+                  precision={2}
+                  prefix="₺"
+                  style={{ width: "100%" }}
+                  formatter={formatDecimalDisplay}
+                  parser={parseDecimalDisplay}
+                />
+              </Form.Item>
+            </div>
+            <UnitEconomicsPanel price={price} cost={cost} />
+          </DialogSection>
 
-          <Form.Item name="categoryId" label="Kategori" rules={[{ required: true, message: "Kategori zorunlu." }]}>
-            <Select
-              size="large"
-              loading={optionsLoading}
-              options={categories.map((category) => ({ label: category.name, value: category.id }))}
-            />
-          </Form.Item>
+          <DialogSection eyebrow="Stok">
+            <div style={dialogTwoColStyle}>
+              <Form.Item
+                name="stock"
+                label="Stok"
+                rules={[
+                  { required: true, message: "Stok zorunlu." },
+                  { type: "number", min: 0, message: "Stok negatif olamaz." },
+                ]}
+              >
+                <InputNumber size="large" min={0} style={{ width: "100%", fontFamily: DIALOG_MONO }} />
+              </Form.Item>
+              <Form.Item
+                name="minStock"
+                label="Kritik stok eşiği"
+                rules={[
+                  { required: true, message: "Kritik stok eşiği zorunlu." },
+                  { type: "number", min: 0, message: "Kritik stok eşiği negatif olamaz." },
+                ]}
+                extra={<p style={dialogHintStyle}>{thresholdHint}</p>}
+              >
+                <InputNumber size="large" min={0} style={{ width: "100%", fontFamily: DIALOG_MONO }} />
+              </Form.Item>
+            </div>
+          </DialogSection>
 
-          <Form.Item name="brandId" label="Marka" rules={[{ required: true, message: "Marka zorunlu." }]}>
-            <Select
-              size="large"
-              loading={optionsLoading}
-              options={brands.map((brand) => ({ label: brand.name, value: brand.id }))}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="supplierId"
-            label="Tedarikçi"
-            rules={[{ required: true, message: "Tedarikçi zorunlu." }]}
-            style={{ gridColumn: "1 / -1" }}
-          >
-            <Select
-              size="large"
-              loading={optionsLoading}
-              options={suppliers.map((supplier) => ({ label: supplier.name, value: supplier.id }))}
-            />
-          </Form.Item>
-
-          <Form.Item name="price" label="Satış fiyatı (₺)" rules={[{ required: true, message: "Satış fiyatı zorunlu." }]}>
-            <InputNumber size="large" min={0} step={0.01} precision={2} style={{ width: "100%" }} />
-          </Form.Item>
-
-          <Form.Item name="costPrice" label="Maliyet (₺)" rules={[{ required: true, message: "Maliyet zorunlu." }]}>
-            <InputNumber size="large" min={0} step={0.01} precision={2} style={{ width: "100%" }} />
-          </Form.Item>
-
-          <Form.Item name="stock" label="Stok" rules={[{ required: true, message: "Stok zorunlu." }]}>
-            <InputNumber size="large" min={0} style={{ width: "100%" }} />
-          </Form.Item>
-
-          <Form.Item
-            name="minStock"
-            label="Kritik stok eşiği"
-            rules={[{ required: true, message: "Kritik stok eşiği zorunlu." }]}
-          >
-            <InputNumber size="large" min={0} style={{ width: "100%" }} />
-          </Form.Item>
-
-          <Form.Item name="unit" label="Birim" rules={[{ required: true, message: "Birim zorunlu." }]}>
-            <Select size="large" options={UNIT_OPTIONS} />
-          </Form.Item>
-
-          <Form.Item name="status" label="Durum" rules={[{ required: true, message: "Durum zorunlu." }]}>
-            <Select size="large" options={STATUS_OPTIONS} />
-          </Form.Item>
-
-          <Form.Item name="description" label="Açıklama" style={{ gridColumn: "1 / -1" }}>
-            <Input.TextArea rows={3} />
-          </Form.Item>
-
-          <Form.Item name="isFeatured" label="Öne çıkan ürün" valuePropName="checked">
-            <Switch />
-          </Form.Item>
-        </div>
-      </Form>
-    </Modal>
+          <DialogSection eyebrow="Yayın" last>
+            <Form.Item name="status" label="Durum" rules={[{ required: true, message: "Durum zorunlu." }]} style={{ marginBottom: 16 }}>
+              <SegmentedPills options={PRODUCT_STATUS_OPTIONS} />
+            </Form.Item>
+            <Form.Item name="description" label="Açıklama" style={{ marginBottom: 16 }}>
+              <Input.TextArea rows={3} />
+            </Form.Item>
+            <DialogSwitchRow>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 500 }}>Öne çıkan ürün</div>
+                <div style={{ fontSize: 11.5, color: "#6C7178", marginTop: 2 }}>
+                  Listelerin en üstünde ve panelde vitrinde görünür.
+                </div>
+              </div>
+              <Form.Item name="isFeatured" valuePropName="checked" noStyle>
+                <Switch style={{ marginLeft: "auto" }} />
+              </Form.Item>
+            </DialogSwitchRow>
+          </DialogSection>
+        </Form>
+      </Modal>
+    </ConfigProvider>
   );
 };
 

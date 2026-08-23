@@ -7,6 +7,8 @@ export type Supplier = {
   phone: string;
   email: string;
   city: string;
+  productCount: number;
+  stockValueKurus: number;
 };
 
 export const getSuppliers = () => request<Supplier[]>("/suppliers", "GET");

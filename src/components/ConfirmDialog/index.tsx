@@ -1,6 +1,5 @@
-import { Modal } from "antd";
-import { ExclamationCircleFilled } from "@ant-design/icons";
-import { BRAND_COLORS } from "../../constants/colors";
+import { Modal, ConfigProvider } from "antd";
+import { DIALOG_COLORS, DIALOG_THEME, DialogCloseIcon, DialogTitle, dialogChromeStyles } from "../dialogTheme";
 
 type ConfirmDialogProps = {
   open: boolean;
@@ -25,43 +24,27 @@ const ConfirmDialog = ({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) => (
-  <Modal
-    open={open}
-    onOk={onConfirm}
-    onCancel={onCancel}
-    okText={confirmText}
-    cancelText={cancelText}
-    okButtonProps={{ danger, loading, size: "large" }}
-    cancelButtonProps={{ size: "large", disabled: loading }}
-    maskClosable={!loading}
-    closable={!loading}
-    centered
-    title={
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <span
-          style={{
-            width: 38,
-            height: 38,
-            borderRadius: 11,
-            background: danger ? "rgba(245, 34, 45, 0.1)" : "rgba(215, 254, 71, 0.35)",
-            color: danger ? "#F5222D" : BRAND_COLORS.secondary,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 18,
-            flex: "0 0 auto",
-          }}
-        >
-          <ExclamationCircleFilled />
-        </span>
-        <span style={{ fontSize: 16, fontWeight: 700, color: BRAND_COLORS.secondary }}>{title}</span>
-      </div>
-    }
-  >
-    {description && (
-      <p style={{ margin: "6px 0 0", fontSize: 14, lineHeight: 1.7, color: "#5C5C5C" }}>{description}</p>
-    )}
-  </Modal>
+  <ConfigProvider theme={DIALOG_THEME}>
+    <Modal
+      open={open}
+      onOk={onConfirm}
+      onCancel={onCancel}
+      okText={confirmText}
+      cancelText={cancelText}
+      okButtonProps={{ danger, loading, size: "large" }}
+      cancelButtonProps={{ size: "large", disabled: loading }}
+      maskClosable={!loading}
+      closable={!loading}
+      centered
+      styles={dialogChromeStyles("70vh")}
+      closeIcon={<DialogCloseIcon />}
+      title={<DialogTitle title={title} />}
+    >
+      {description && (
+        <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.7, color: DIALOG_COLORS.muted }}>{description}</p>
+      )}
+    </Modal>
+  </ConfigProvider>
 );
 
 export default ConfirmDialog;
