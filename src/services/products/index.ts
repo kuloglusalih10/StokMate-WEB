@@ -20,6 +20,14 @@ export type Product = {
   updatedAt: string;
 };
 
+export type ProductDetail = Product & {
+  supplierId: number;
+  supplierName: string;
+  costPrice: number;
+  description: string;
+  createdAt: string;
+};
+
 export type ProductListParams = {
   q?: string;
   categoryId?: number;
@@ -61,3 +69,47 @@ export const getProducts = (params: ProductListParams = {}) =>
   request<ProductListResponse>(`/products${buildQuery(params)}`, "GET");
 
 export const getProductStats = () => request<ProductStats>("/products/stats", "GET");
+
+export const getProductById = (id: number) => request<ProductDetail>(`/products/${id}`, "GET");
+
+export const deleteProduct = (id: number) => request<void>(`/products/${id}`, "DELETE");
+
+export type ProductUpdatePayload = {
+  name: string;
+  sku: string;
+  barcode: string;
+  categoryId: number;
+  brandId: number;
+  supplierId: number;
+  price: number;
+  costPrice: number;
+  stock: number;
+  minStock: number;
+  unit: number;
+  status: number;
+  description: string;
+  isFeatured: boolean;
+};
+
+export const updateProduct = (id: number, payload: ProductUpdatePayload) =>
+  request<Product>(`/products/${id}`, "PUT", payload);
+
+export type ProductCreatePayload = {
+  name: string;
+  sku: string;
+  barcode?: string;
+  categoryId: number;
+  brandId: number;
+  supplierId: number;
+  price: number;
+  costPrice: number;
+  stock: number;
+  minStock: number;
+  unit: number;
+  status: number;
+  description?: string;
+  isFeatured?: boolean;
+};
+
+export const createProduct = (payload: ProductCreatePayload) =>
+  request<Product>("/products", "POST", payload);
