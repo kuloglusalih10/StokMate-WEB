@@ -7,6 +7,7 @@ import {
 import type { ReactNode } from "react";
 import type { ProductStats } from "../../../services/products";
 import { BRAND_COLORS } from "../../../constants/colors";
+import { StatsCardsSkeleton } from "../loading";
 
 type StatsCardsProps = {
   stats: ProductStats | null;
@@ -65,6 +66,10 @@ const CARDS: CardConfig[] = [
 ];
 
 const StatsCards = ({ stats, loading }: StatsCardsProps) => {
+  if (loading || !stats) {
+    return <StatsCardsSkeleton />;
+  }
+
   return (
     <div
       style={{
@@ -94,7 +99,7 @@ const StatsCards = ({ stats, loading }: StatsCardsProps) => {
               {card.label}
             </div>
             <div style={{ fontSize: 26, fontWeight: 800, color: BRAND_COLORS.secondary, lineHeight: 1.1 }}>
-              {loading || !stats ? "—" : card.value(stats)}
+              {card.value(stats)}
             </div>
           </div>
           <div

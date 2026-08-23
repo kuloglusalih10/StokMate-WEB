@@ -13,6 +13,7 @@ import { getBrands, type Brand } from "../../services/brands";
 import { toast } from "react-toastify";
 import { BRAND_COLORS } from "../../constants/colors";
 import StatsCards from "./components/StatsCards";
+import { ProductsTableSkeleton } from "./loading";
 
 const { Search } = Input;
 
@@ -61,6 +62,7 @@ const Products = () => {
   const [statsLoading, setStatsLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
   const [brandId, setBrandId] = useState<number | undefined>(undefined);
@@ -119,6 +121,7 @@ const Products = () => {
         dir: sortDir,
       });
       setLoading(false);
+      setHasLoadedOnce(true);
 
       if (!result.res) {
         toast.error(result.message);
@@ -284,45 +287,49 @@ const Products = () => {
           style={{ minWidth: 200, fontSize: 15 }}
         />
       </div>
-      <Table<Product>
-        rowKey="id"
-        columns={columns}
-        dataSource={products}
-        loading={loading}
-        tableLayout="fixed"
-        showSorterTooltip={false}
-        scroll={{ x: 1010 }}
-        style={{ fontSize: 15 }}
-        pagination={{
-          current: page,
-          pageSize,
-          total,
-          showSizeChanger: true,
-        }}
-        onChange={(paginationConfig, _filters, sorter) => {
-          const activeSorter = Array.isArray(sorter) ? sorter[0] : sorter;
-          const order = activeSorter?.order;
-          const field = activeSorter?.field as string | undefined;
-          const mappedField = field ? SORT_KEY_MAP[field] : undefined;
+      {!hasLoadedOnce ? (
+        <ProductsTableSkeleton />
+      ) : (
+        <Table<Product>
+          rowKey="id"
+          columns={columns}
+          dataSource={products}
+          loading={loading}
+          tableLayout="fixed"
+          showSorterTooltip={false}
+          scroll={{ x: 1010 }}
+          style={{ fontSize: 15 }}
+          pagination={{
+            current: page,
+            pageSize,
+            total,
+            showSizeChanger: true,
+          }}
+          onChange={(paginationConfig, _filters, sorter) => {
+            const activeSorter = Array.isArray(sorter) ? sorter[0] : sorter;
+            const order = activeSorter?.order;
+            const field = activeSorter?.field as string | undefined;
+            const mappedField = field ? SORT_KEY_MAP[field] : undefined;
 
-          const nextSortField = order ? mappedField : undefined;
-          const nextSortDir = order === "ascend" ? "asc" : order === "descend" ? "desc" : undefined;
-          const sortChanged = nextSortField !== sortField || nextSortDir !== sortDir;
+            const nextSortField = order ? mappedField : undefined;
+            const nextSortDir = order === "ascend" ? "asc" : order === "descend" ? "desc" : undefined;
+            const sortChanged = nextSortField !== sortField || nextSortDir !== sortDir;
 
-          setSortField(nextSortField);
-          setSortDir(nextSortDir);
+            setSortField(nextSortField);
+            setSortDir(nextSortDir);
 
-          if (sortChanged) {
-            setPage(1);
-          } else if (paginationConfig.current) {
-            setPage(paginationConfig.current);
-          }
+            if (sortChanged) {
+              setPage(1);
+            } else if (paginationConfig.current) {
+              setPage(paginationConfig.current);
+            }
 
-          if (paginationConfig.pageSize) {
-            setPageSize(paginationConfig.pageSize);
-          }
-        }}
-      />
+            if (paginationConfig.pageSize) {
+              setPageSize(paginationConfig.pageSize);
+            }
+          }}
+        />
+      )}
     </div>
   );
 };
