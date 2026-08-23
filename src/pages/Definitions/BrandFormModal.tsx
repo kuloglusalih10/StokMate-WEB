@@ -1,33 +1,35 @@
 import { useEffect, useState } from "react";
 import { Modal, Form, Input, ConfigProvider } from "antd";
 import { toast } from "react-toastify";
-import { createBrand, type Brand } from "../../services/brands";
+import { createBrand, updateBrand, type Brand } from "../../services/brands";
 import { DIALOG_THEME, DialogCloseIcon, DialogFooter, DialogTitle, dialogChromeStyles } from "../../components/dialogTheme";
 
-type QuickCreateBrandFormValues = {
+type BrandFormValues = {
   name: string;
 };
 
-type QuickCreateBrandModalProps = {
+type BrandFormModalProps = {
   open: boolean;
+  brand: Brand | null;
   onClose: () => void;
-  onCreated: (brand: Brand) => void;
+  onSaved: (brand: Brand) => void;
 };
 
-const QuickCreateBrandModal = ({ open, onClose, onCreated }: QuickCreateBrandModalProps) => {
-  const [form] = Form.useForm<QuickCreateBrandFormValues>();
+const BrandFormModal = ({ open, brand, onClose, onSaved }: BrandFormModalProps) => {
+  const [form] = Form.useForm<BrandFormValues>();
   const [saving, setSaving] = useState(false);
+  const isEdit = Boolean(brand);
 
   useEffect(() => {
     if (!open) return;
-    form.resetFields();
-  }, [open, form]);
+    form.setFieldsValue({ name: brand?.name ?? "" });
+  }, [open, brand, form]);
 
   const handleSubmit = async () => {
     const values = await form.validateFields();
 
     setSaving(true);
-    const result = await createBrand({ name: values.name });
+    const result = brand ? await updateBrand(brand.id, { name: values.name }) : await createBrand({ name: values.name });
     setSaving(false);
 
     if (!result.res) {
@@ -35,8 +37,8 @@ const QuickCreateBrandModal = ({ open, onClose, onCreated }: QuickCreateBrandMod
       return;
     }
 
-    toast.success("Marka eklendi.");
-    onCreated(result.data);
+    toast.success(isEdit ? "Marka güncellendi." : "Marka eklendi.");
+    onSaved(result.data);
   };
 
   return (
@@ -49,8 +51,8 @@ const QuickCreateBrandModal = ({ open, onClose, onCreated }: QuickCreateBrandMod
         centered
         styles={dialogChromeStyles("70vh")}
         closeIcon={<DialogCloseIcon />}
-        title={<DialogTitle title="Yeni marka ekle" />}
-        footer={<DialogFooter onCancel={onClose} onSubmit={handleSubmit} saving={saving} submitText="Ekle" />}
+        title={<DialogTitle title={isEdit ? "Markayı düzenle" : "Yeni marka ekle"} />}
+        footer={<DialogFooter onCancel={onClose} onSubmit={handleSubmit} saving={saving} submitText={isEdit ? "Kaydet" : "Ekle"} />}
       >
         <Form form={form} layout="vertical" disabled={saving} requiredMark={false}>
           <Form.Item
@@ -70,4 +72,4 @@ const QuickCreateBrandModal = ({ open, onClose, onCreated }: QuickCreateBrandMod
   );
 };
 
-export default QuickCreateBrandModal;
+export default BrandFormModal;

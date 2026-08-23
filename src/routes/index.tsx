@@ -4,7 +4,7 @@ import MainLayout from "../layouts";
 import Products from "../pages/Products";
 import ProductDetail from "../pages/ProductDetail";
 import Statistics from "../pages/Statistics";
-import Settings from "../pages/Settings";
+import Definitions from "../pages/Definitions";
 import NotFound from "../pages/NotFound";
 
 const AppRoutes = () => (
@@ -15,7 +15,7 @@ const AppRoutes = () => (
       <Route path="urunler" element={<Products />} />
       <Route path="urunler/:id" element={<ProductDetail />} />
       <Route path="istatistikler" element={<Statistics />} />
-      <Route path="ayarlar" element={<Settings />} />
+      <Route path="definitions" element={<Definitions />} />
     </Route>
     <Route path="*" element={<NotFound />} />
   </Routes>

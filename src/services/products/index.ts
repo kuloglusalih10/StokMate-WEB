@@ -33,6 +33,8 @@ export type ProductListParams = {
   categoryId?: number;
   brandId?: number;
   status?: number;
+  stockStatus?: "low" | "out";
+  featured?: boolean;
   page?: number;
   pageSize?: number;
   sort?: "name" | "price" | "stock" | "updatedAt" | "category" | "brand" | "status";
@@ -76,6 +78,9 @@ export type CategoryBreakdownItem = {
   categoryColor: string;
   productCount: number;
   stockValue: number;
+  healthyCount: number;
+  lowStockCount: number;
+  outOfStockCount: number;
 };
 
 export type BrandBreakdownItem = {
@@ -156,3 +161,37 @@ export type ProductCreatePayload = {
 
 export const createProduct = (payload: ProductCreatePayload) =>
   request<Product>("/products", "POST", payload);
+
+export type ActivityLogAction =
+  | "Created"
+  | "Updated"
+  | "Deleted"
+  | "StockIn"
+  | "StockAdjusted"
+  | "PriceChanged"
+  | "CostPriceChanged"
+  | "StatusChanged"
+  | "FeaturedChanged";
+
+export type ActivityLog = {
+  id: number;
+  action: ActivityLogAction;
+  description: string;
+  quantityDelta: number | null;
+  amountKurus: number | null;
+  createdAt: string;
+};
+
+export const getProductLogs = (id: number, limit = 20) =>
+  request<ActivityLog[]>(`/products/${id}/logs?limit=${limit}`, "GET");
+
+export const addProductStockEntry = (id: number, quantity: number) =>
+  request<Product>(`/products/${id}/stock-entries`, "POST", { quantity });
+
+export type StockHistoryPoint = {
+  weekEnding: string;
+  stock: number;
+};
+
+export const getProductStockHistory = (id: number, weeks = 12) =>
+  request<StockHistoryPoint[]>(`/products/${id}/stock-history?weeks=${weeks}`, "GET");

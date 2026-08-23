@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Modal, Form, Input, ConfigProvider } from "antd";
 import { toast } from "react-toastify";
-import { createSupplier, type Supplier } from "../../services/suppliers";
+import { createSupplier, updateSupplier, type Supplier } from "../../services/suppliers";
 import { DIALOG_THEME, DialogCloseIcon, DialogFooter, DialogSection, DialogTitle, dialogChromeStyles, dialogTwoColStyle } from "../../components/dialogTheme";
 
-type QuickCreateSupplierFormValues = {
+type SupplierFormValues = {
   name: string;
   contactName?: string;
   phone?: string;
@@ -12,32 +12,41 @@ type QuickCreateSupplierFormValues = {
   city?: string;
 };
 
-type QuickCreateSupplierModalProps = {
+type SupplierFormModalProps = {
   open: boolean;
+  supplier: Supplier | null;
   onClose: () => void;
-  onCreated: (supplier: Supplier) => void;
+  onSaved: (supplier: Supplier) => void;
 };
 
-const QuickCreateSupplierModal = ({ open, onClose, onCreated }: QuickCreateSupplierModalProps) => {
-  const [form] = Form.useForm<QuickCreateSupplierFormValues>();
+const SupplierFormModal = ({ open, supplier, onClose, onSaved }: SupplierFormModalProps) => {
+  const [form] = Form.useForm<SupplierFormValues>();
   const [saving, setSaving] = useState(false);
+  const isEdit = Boolean(supplier);
 
   useEffect(() => {
     if (!open) return;
-    form.resetFields();
-  }, [open, form]);
+    form.setFieldsValue({
+      name: supplier?.name ?? "",
+      contactName: supplier?.contactName ?? "",
+      phone: supplier?.phone ?? "",
+      email: supplier?.email ?? "",
+      city: supplier?.city ?? "",
+    });
+  }, [open, supplier, form]);
 
   const handleSubmit = async () => {
     const values = await form.validateFields();
-
-    setSaving(true);
-    const result = await createSupplier({
+    const payload = {
       name: values.name,
       contactName: values.contactName || undefined,
       phone: values.phone || undefined,
       email: values.email || undefined,
       city: values.city || undefined,
-    });
+    };
+
+    setSaving(true);
+    const result = supplier ? await updateSupplier(supplier.id, payload) : await createSupplier(payload);
     setSaving(false);
 
     if (!result.res) {
@@ -45,8 +54,8 @@ const QuickCreateSupplierModal = ({ open, onClose, onCreated }: QuickCreateSuppl
       return;
     }
 
-    toast.success("Tedarikçi eklendi.");
-    onCreated(result.data);
+    toast.success(isEdit ? "Tedarikçi güncellendi." : "Tedarikçi eklendi.");
+    onSaved(result.data);
   };
 
   return (
@@ -60,8 +69,8 @@ const QuickCreateSupplierModal = ({ open, onClose, onCreated }: QuickCreateSuppl
         centered
         styles={dialogChromeStyles("80vh")}
         closeIcon={<DialogCloseIcon />}
-        title={<DialogTitle title="Yeni tedarikçi ekle" />}
-        footer={<DialogFooter onCancel={onClose} onSubmit={handleSubmit} saving={saving} submitText="Ekle" />}
+        title={<DialogTitle title={isEdit ? "Tedarikçiyi düzenle" : "Yeni tedarikçi ekle"} />}
+        footer={<DialogFooter onCancel={onClose} onSubmit={handleSubmit} saving={saving} submitText={isEdit ? "Kaydet" : "Ekle"} />}
       >
         <Form form={form} layout="vertical" disabled={saving} requiredMark={false}>
           <DialogSection last>
@@ -99,4 +108,4 @@ const QuickCreateSupplierModal = ({ open, onClose, onCreated }: QuickCreateSuppl
   );
 };
 
-export default QuickCreateSupplierModal;
+export default SupplierFormModal;

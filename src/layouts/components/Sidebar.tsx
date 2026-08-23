@@ -36,9 +36,9 @@ const menuItems = [
     label: "İstatistikler",
   },
   {
-    key: "/ayarlar",
+    key: "/definitions",
     icon: <SettingOutlined style={{ fontSize: 19 }} />,
-    label: "Ayarlar",
+    label: "Tanımlar",
   },
 ];
 

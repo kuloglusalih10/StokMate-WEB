@@ -6,6 +6,8 @@ export type Category = {
   slug: string;
   sortOrder: number;
   color: string;
+  productCount: number;
+  stockValueKurus: number;
 };
 
 export const getCategories = () => request<Category[]>("/categories", "GET");
