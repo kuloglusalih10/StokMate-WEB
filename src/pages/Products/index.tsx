@@ -16,6 +16,7 @@ import { getBrands, type Brand } from "../../services/brands";
 import { toast } from "react-toastify";
 import { ProductsTableSkeleton } from "./loading";
 import NewProductDialog from "./NewProductDialog";
+import { useProductEvents } from "../../hooks/useProductEvents";
 
 const { Search } = Input;
 
@@ -147,6 +148,10 @@ const Products = () => {
   const [sortDir, setSortDir] = useState<ProductListParams["dir"]>(undefined);
   const [refreshKey, setRefreshKey] = useState(0);
   const [newProductDialogOpen, setNewProductDialogOpen] = useState(false);
+
+  useProductEvents(() => {
+    setRefreshKey((key) => key + 1);
+  });
 
   const getSortOrder = (key: SortKey): "ascend" | "descend" | null => {
     if (sortField !== key) return null;

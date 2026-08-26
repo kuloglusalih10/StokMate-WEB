@@ -65,13 +65,34 @@ const QuickCreateSupplierModal = ({ open, onClose, onCreated }: QuickCreateSuppl
             <Form.Item name="contactName" label="Yetkili kişi">
               <Input size="large" />
             </Form.Item>
-            <Form.Item name="phone" label="Telefon">
-              <Input size="large" />
+            <Form.Item
+              name="phone"
+              label="Telefon"
+              rules={[
+                {
+                  pattern: /^0[0-9]{10}$/,
+                  message: "Geçerli bir telefon numarası gir (05XX XXX XXXX).",
+                },
+              ]}
+            >
+              <Input
+                size="large"
+                placeholder="05XX XXX XXXX"
+                maxLength={11}
+                onInput={(e) => {
+                  const input = e.target as HTMLInputElement;
+                  input.value = input.value.replace(/[^0-9]/g, "");
+                }}
+              />
             </Form.Item>
           </div>
           <div style={dialogTwoColStyle}>
-            <Form.Item name="email" label="E-posta" rules={[{ type: "email", message: "Geçerli bir e-posta gir." }]}>
-              <Input size="large" />
+            <Form.Item
+              name="email"
+              label="E-posta"
+              rules={[{ type: "email", message: "Geçerli bir e-posta adresi gir." }]}
+            >
+              <Input size="large" placeholder="ornek@firma.com" />
             </Form.Item>
             <Form.Item name="city" label="Şehir" style={{ marginBottom: 0 }}>
               <Input size="large" />

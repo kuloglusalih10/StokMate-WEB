@@ -116,6 +116,7 @@ const Definitions = () => {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<TabKey>("categories");
   const [search, setSearch] = useState("");
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
 
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -123,6 +124,12 @@ const Definitions = () => {
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
   const [supplierModalOpen, setSupplierModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const loadAll = async () => {
@@ -197,7 +204,7 @@ const Definitions = () => {
       ref={pageParent}
       style={{
         margin: "-24px",
-        padding: "30px 34px 56px",
+        padding: isMobile ? "22px 16px 44px" : "30px 34px 56px",
         background: COLORS.canvas,
         minHeight: "calc(100vh - 76px)",
         fontFamily: SANS,
@@ -262,8 +269,8 @@ const Definitions = () => {
       </div>
 
       <div style={panelStyle}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", borderBottom: `1px solid ${COLORS.line}`, flexWrap: "wrap" }}>
-          <div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: isMobile ? "14px 16px" : "16px 20px", borderBottom: `1px solid ${COLORS.line}`, flexWrap: "wrap" }}>
+          <div style={{ flex: isMobile ? "1 1 100%" : undefined }}>
             <h2 style={{ fontSize: 14, fontWeight: 700, margin: 0, color: COLORS.text }}>{meta.title}</h2>
             <p style={{ margin: "2px 0 0", fontSize: 12, color: COLORS.muted }}>{meta.subtitle}</p>
           </div>
@@ -273,13 +280,13 @@ const Definitions = () => {
             allowClear
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            style={{ marginLeft: "auto", minWidth: 230, borderRadius: 10, borderColor: COLORS.line, background: "#FCFCFB" }}
+            style={{ marginLeft: isMobile ? 0 : "auto", width: isMobile ? "100%" : undefined, minWidth: isMobile ? undefined : 230, borderRadius: 10, borderColor: COLORS.line, background: "#FCFCFB" }}
           />
         </div>
 
         <div
           ref={listParent}
-          style={tab === "suppliers" ? { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, padding: "18px 20px" } : undefined}
+          style={tab === "suppliers" ? { display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(280px, 1fr))", gap: 14, padding: isMobile ? "14px 16px" : "18px 20px" } : undefined}
         >
           {tab === "categories" &&
             (filteredCategories.length === 0 ? (
@@ -288,7 +295,13 @@ const Definitions = () => {
               filteredCategories.map((category, index) => (
                 <div
                   key={category.id}
-                  style={{
+                  style={isMobile ? {
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 10,
+                    padding: "14px 16px",
+                    borderBottom: index === filteredCategories.length - 1 ? "none" : `1px solid ${COLORS.lineSoft}`,
+                  } : {
                     display: "grid",
                     gridTemplateColumns: "1fr 118px 190px 168px",
                     alignItems: "center",
@@ -301,22 +314,30 @@ const Definitions = () => {
                     <span style={{ width: 34, height: 34, borderRadius: 9, flex: "0 0 34px", display: "flex", alignItems: "center", justifyContent: "center", background: `${category.color}1F` }}>
                       <span style={{ width: 12, height: 12, borderRadius: 4, display: "block", background: category.color }} />
                     </span>
-                    <span style={{ minWidth: 0 }}>
+                    <span style={{ minWidth: 0, flex: 1 }}>
                       <span style={{ display: "block", fontSize: 13.5, fontWeight: 600, letterSpacing: "-0.01em" }}>{category.name}</span>
                       <span style={{ display: "block", fontFamily: MONO, fontSize: 11, color: COLORS.muted, letterSpacing: "0.02em" }}>{category.slug}</span>
                     </span>
+                    {isMobile && (
+                      <span style={{ fontFamily: MONO, fontSize: 13, flex: "0 0 auto" }}>
+                        {category.productCount}
+                        <small style={{ color: COLORS.muted, fontSize: 11, marginLeft: 5 }}>ürün</small>
+                      </span>
+                    )}
                   </div>
-                  <span style={{ fontFamily: MONO, fontSize: 13 }}>
-                    {category.productCount}
-                    <small style={{ color: COLORS.muted, fontSize: 11, marginLeft: 5 }}>ürün</small>
-                  </span>
+                  {!isMobile && (
+                    <span style={{ fontFamily: MONO, fontSize: 13 }}>
+                      {category.productCount}
+                      <small style={{ color: COLORS.muted, fontSize: 11, marginLeft: 5 }}>ürün</small>
+                    </span>
+                  )}
                   <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ flex: 1, height: 6, borderRadius: 3, background: "rgba(14,17,22,0.07)", overflow: "hidden" }}>
                       <span style={{ display: "block", height: "100%", borderRadius: 3, width: `${(category.stockValueKurus / maxCategoryValue) * 100}%`, background: category.color }} />
                     </span>
                     <span style={{ fontFamily: MONO, fontSize: 12, color: "#3A3F45", minWidth: 74, textAlign: "right" }}>{formatTl(category.stockValueKurus)}</span>
                   </span>
-                  <span style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
+                  <span style={{ display: "flex", gap: 6, justifyContent: isMobile ? "flex-start" : "flex-end" }}>
                     <button
                       type="button"
                       style={ghostBtnStyle}
@@ -344,7 +365,13 @@ const Definitions = () => {
               filteredBrands.map((brand, index) => (
                 <div
                   key={brand.id}
-                  style={{
+                  style={isMobile ? {
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 10,
+                    padding: "14px 16px",
+                    borderBottom: index === filteredBrands.length - 1 ? "none" : `1px solid ${COLORS.lineSoft}`,
+                  } : {
                     display: "grid",
                     gridTemplateColumns: "1fr 260px 168px",
                     alignItems: "center",
@@ -365,7 +392,7 @@ const Definitions = () => {
                     </span>
                     <span style={{ fontFamily: MONO, fontSize: 12, color: "#3A3F45", minWidth: 74, textAlign: "right" }}>{brand.productCount} ürün</span>
                   </span>
-                  <span style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
+                  <span style={{ display: "flex", gap: 6, justifyContent: isMobile ? "flex-start" : "flex-end" }}>
                     <button
                       type="button"
                       style={ghostBtnStyle}
@@ -391,19 +418,19 @@ const Definitions = () => {
               <EmptyState />
             ) : (
               filteredSuppliers.map((supplier) => (
-                <div key={supplier.id} style={{ border: `1px solid ${COLORS.lineSoft}`, borderRadius: 12, padding: 16, display: "flex", flexDirection: "column", gap: 12, background: "#FCFCFB" }}>
+                <div key={supplier.id} style={{ border: `1px solid ${COLORS.lineSoft}`, borderRadius: 12, padding: isMobile ? 14 : 16, display: "flex", flexDirection: "column", gap: 12, background: "#FCFCFB" }}>
                   <div>
                     <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
                       <span style={{ flex: 1, fontSize: 14, fontWeight: 600, lineHeight: 1.3 }}>{supplier.name}</span>
                       {supplier.city && (
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: MONO, fontSize: 10.5, letterSpacing: "0.06em", textTransform: "uppercase", color: COLORS.muted, border: `1px solid ${COLORS.line}`, borderRadius: 999, padding: "3px 9px" }}>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: MONO, fontSize: 10.5, letterSpacing: "0.06em", textTransform: "uppercase", color: COLORS.muted, border: `1px solid ${COLORS.line}`, borderRadius: 999, padding: "3px 9px", whiteSpace: "nowrap" }}>
                           {supplier.city}
                         </span>
                       )}
                     </div>
                     {supplier.contactName && <div style={{ fontSize: 12.5, color: COLORS.muted, marginTop: 4 }}>{supplier.contactName}</div>}
                   </div>
-                  <div style={{ display: "flex", gap: 18, paddingTop: 12, borderTop: `1px solid ${COLORS.lineSoft}`, marginTop: "auto", alignItems: "center" }}>
+                  <div style={{ display: "flex", gap: isMobile ? 14 : 18, paddingTop: 12, borderTop: `1px solid ${COLORS.lineSoft}`, marginTop: "auto", alignItems: "center", flexWrap: "wrap" }}>
                     <span>
                       <span style={{ display: "block", fontFamily: MONO, fontSize: 15, letterSpacing: "-0.02em", lineHeight: 1 }}>{supplier.productCount}</span>
                       <span style={{ display: "block", fontSize: 11, color: COLORS.muted, marginTop: 3 }}>ürün</span>
@@ -430,7 +457,7 @@ const Definitions = () => {
             ))}
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, padding: "13px 20px", borderTop: `1px solid ${COLORS.line}`, fontSize: 12, color: COLORS.muted, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: isMobile ? 8 : 14, padding: isMobile ? "13px 16px" : "13px 20px", borderTop: `1px solid ${COLORS.line}`, fontSize: 12, color: COLORS.muted, flexWrap: "wrap" }}>
           {tab === "categories" && (
             <>
               <span>

@@ -32,7 +32,7 @@ const Login = () => {
 
   return (
     <div className="w-screen h-screen flex">
-      <div className="hidden lg:flex" style={{ width: "48%" }}>
+      <div className="hidden lg:block" style={{ flex: "1.1 1 0%" }}>
         <InventoryShowcase />
       </div>
 
@@ -79,7 +79,7 @@ const Login = () => {
                 htmlType="submit"
                 block
                 loading={submitting}
-                style={{ height: 54, fontSize: 16, borderRadius: 8 }}
+                style={{ height: 54, fontSize: 16, borderRadius: 8, backgroundColor: "#D7FE47", color: "#0E0F0C", borderColor: "#D7FE47" }}
               >
                 Giriş Yap
               </Button>

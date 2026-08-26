@@ -23,6 +23,7 @@ import ProductDetailLoading from "./loading";
 import ConfirmDialog from "../../components/ConfirmDialog";
 import EditProductDialog from "./EditProductDialog";
 import StockEntryDialog from "./StockEntryDialog";
+import { useProductEvents } from "../../hooks/useProductEvents";
 
 const COLORS = {
   ink: "#0E1116",
@@ -240,6 +241,7 @@ const ProductDetailPage = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [stockDialogOpen, setStockDialogOpen] = useState(false);
   const [isNarrow, setIsNarrow] = useState(() => typeof window !== "undefined" && window.innerWidth < 1180);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
 
   const loadLogs = useCallback(async (productId: number) => {
     const result = await getProductLogs(productId, 8);
@@ -281,10 +283,30 @@ const ProductDetailPage = () => {
   }, [id, loadLogs, loadStockHistory]);
 
   useEffect(() => {
-    const handleResize = () => setIsNarrow(window.innerWidth < 1180);
+    const handleResize = () => {
+      setIsNarrow(window.innerWidth < 1180);
+      setIsMobile(window.innerWidth < 768);
+    };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useProductEvents((event) => {
+    if (!product || event.productId !== product.id) return;
+
+    if (event.type === "product.deleted") {
+      toast.info("Bu ürün başka bir cihazdan silindi.");
+      navigate("/urunler", { replace: true });
+      return;
+    }
+
+    if (event.product) {
+      setProduct((prev) => (prev ? { ...prev, ...event.product } : prev));
+    }
+
+    loadLogs(product.id);
+    loadStockHistory(product.id);
+  });
 
   useEffect(() => {
     if (loading) return;
@@ -358,7 +380,7 @@ const ProductDetailPage = () => {
     <div
       style={{
         margin: "-24px",
-        padding: "30px 34px 56px",
+        padding: isMobile ? "22px 16px 44px" : "30px 34px 56px",
         background: COLORS.canvas,
         minHeight: "calc(100vh - 76px)",
         fontFamily: SANS,
@@ -367,8 +389,8 @@ const ProductDetailPage = () => {
         color: COLORS.text,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, marginBottom: 20, flexWrap: "wrap" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: isMobile ? 12 : 24, marginBottom: 20, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, flex: isMobile ? "1 1 100%" : undefined }}>
           <button
             type="button"
             onClick={() => navigate("/urunler")}
@@ -391,7 +413,7 @@ const ProductDetailPage = () => {
           </button>
           <nav
             aria-label="Konum"
-            style={{ display: "flex", alignItems: "center", gap: 9, fontFamily: MONO, fontSize: 11, letterSpacing: "0.04em", color: COLORS.muted }}
+            style={{ display: "flex", alignItems: "center", gap: 9, fontFamily: MONO, fontSize: 11, letterSpacing: "0.04em", color: COLORS.muted, minWidth: 0, overflow: "hidden" }}
           >
             <a
               href="/urunler"
@@ -399,30 +421,30 @@ const ProductDetailPage = () => {
                 event.preventDefault();
                 navigate("/urunler");
               }}
-              style={{ color: COLORS.muted, textDecoration: "none" }}
+              style={{ color: COLORS.muted, textDecoration: "none", whiteSpace: "nowrap" }}
             >
               Ürünler
             </a>
-            <span style={{ opacity: 0.45 }}>/</span>
-            <span>{product.categoryName}</span>
-            <span style={{ opacity: 0.45 }}>/</span>
-            <b style={{ color: COLORS.text, fontWeight: 500 }}>{product.sku}</b>
+            <span style={{ opacity: 0.45, flex: "0 0 auto" }}>/</span>
+            <span style={{ whiteSpace: "nowrap" }}>{product.categoryName}</span>
+            <span style={{ opacity: 0.45, flex: "0 0 auto" }}>/</span>
+            <b style={{ color: COLORS.text, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{product.sku}</b>
           </nav>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", flex: isMobile ? "1 1 100%" : undefined }}>
           <Button
-            size="large"
+            size={isMobile ? "middle" : "large"}
             icon={<PlusOutlined />}
             onClick={() => setStockDialogOpen(true)}
             style={{ background: COLORS.ink, borderColor: COLORS.ink, color: "#FFFFFF" }}
           >
             Stok girişi
           </Button>
-          <Button size="large" icon={<EditOutlined />} onClick={() => setEditDialogOpen(true)}>
+          <Button size={isMobile ? "middle" : "large"} icon={<EditOutlined />} onClick={() => setEditDialogOpen(true)}>
             Düzenle
           </Button>
           <Button
-            size="large"
+            size={isMobile ? "middle" : "large"}
             type="text"
             icon={<DeleteOutlined />}
             onClick={() => setDeleteDialogOpen(true)}
@@ -433,14 +455,14 @@ const ProductDetailPage = () => {
         </div>
       </div>
 
-      <div ref={gridParent} style={{ display: "grid", gridTemplateColumns: "repeat(12, 1fr)", gap: 16 }}>
+      <div ref={gridParent} style={{ display: "grid", gridTemplateColumns: "repeat(12, 1fr)", gap: isMobile ? 12 : 16 }}>
         <section
           style={{
             gridColumn: "span 12",
             background: COLORS.ink,
             color: "#F2F3EE",
             borderRadius: 14,
-            padding: "26px 30px",
+            padding: isMobile ? "20px 16px" : "26px 30px",
             display: "grid",
             gridTemplateColumns: isNarrow ? "1fr" : "1.25fr 1fr",
             gap: isNarrow ? 28 : 44,
@@ -448,12 +470,12 @@ const ProductDetailPage = () => {
             ...reveal(mounted, 0.02),
           }}
         >
-          <div style={{ display: "flex", gap: 22, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: isMobile ? 14 : 22, alignItems: isMobile ? "flex-start" : "center" }}>
             <div
               style={{
-                width: 112,
-                height: 112,
-                flex: "0 0 112px",
+                width: isMobile ? 72 : 112,
+                height: isMobile ? 72 : 112,
+                flex: isMobile ? "0 0 72px" : "0 0 112px",
                 borderRadius: 12,
                 background: "#F2F3EE",
                 overflow: "hidden",
@@ -465,8 +487,8 @@ const ProductDetailPage = () => {
                 style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
               />
             </div>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 11 }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: isMobile ? 8 : 11 }}>
                 <span
                   style={{
                     fontFamily: MONO,
@@ -518,19 +540,22 @@ const ProductDetailPage = () => {
               </div>
               <h1
                 style={{
-                  fontSize: 32,
+                  fontSize: isMobile ? 22 : 32,
                   fontWeight: 800,
                   letterSpacing: "-0.035em",
                   margin: "0 0 8px",
-                  lineHeight: 1.05,
+                  lineHeight: 1.1,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  wordBreak: "break-word",
                 }}
               >
                 {product.name}
               </h1>
-              <p style={{ fontFamily: MONO, fontSize: 12, color: "rgba(242,243,238,0.5)", letterSpacing: "0.03em", margin: 0 }}>
+              <p style={{ fontFamily: MONO, fontSize: isMobile ? 11 : 12, color: "rgba(242,243,238,0.5)", letterSpacing: "0.03em", margin: 0, wordBreak: "break-all" }}>
                 {`${product.sku} · ${product.brandName} · ${unitLabel}`}
               </p>
             </div>
@@ -538,8 +563,8 @@ const ProductDetailPage = () => {
 
           <div>
             <p style={{ ...eyebrowStyle, color: "rgba(242,243,238,0.45)" }}>Birim ekonomisi</p>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", margin: "10px 0 12px" }}>
-              <span style={{ fontFamily: MONO, fontSize: 38, letterSpacing: "-0.04em", lineHeight: 1 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", margin: "10px 0 12px", gap: 10, flexWrap: "wrap" }}>
+              <span style={{ fontFamily: MONO, fontSize: isMobile ? 28 : 38, letterSpacing: "-0.04em", lineHeight: 1 }}>
                 {formatUnitPrice(product.price)}
               </span>
               <span style={{ fontFamily: MONO, fontSize: 13, color: COLORS.lime }}>{`%${marginPercent} marj`}</span>
@@ -594,12 +619,12 @@ const ProductDetailPage = () => {
             <span style={eyebrowStyle}>Depo 01</span>
           </div>
 
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 16, marginBottom: 22 }}>
-            <span style={{ fontFamily: MONO, fontSize: 52, letterSpacing: "-0.045em", lineHeight: 0.9 }}>{product.stock}</span>
-            <span style={{ fontSize: 13, color: COLORS.muted, paddingBottom: 5 }}>{unitLabel.toLowerCase()}</span>
+          <div style={{ display: "flex", alignItems: isMobile ? "flex-start" : "flex-end", gap: isMobile ? 10 : 16, marginBottom: 22, flexWrap: "wrap" }}>
+            <span style={{ fontFamily: MONO, fontSize: isMobile ? 38 : 52, letterSpacing: "-0.045em", lineHeight: 0.9 }}>{product.stock}</span>
+            <span style={{ fontSize: 13, color: COLORS.muted, paddingBottom: isMobile ? 0 : 5 }}>{unitLabel.toLowerCase()}</span>
             <span
               style={{
-                marginLeft: "auto",
+                marginLeft: isMobile ? 0 : "auto",
                 fontFamily: MONO,
                 fontSize: 11,
                 padding: "6px 12px",
