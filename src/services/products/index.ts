@@ -1,0 +1,197 @@
+import { request } from "../request";
+
+export type Product = {
+  id: number;
+  name: string;
+  sku: string;
+  barcode: string;
+  imageUrl: string;
+  categoryId: number;
+  categoryName: string;
+  categoryColor: string;
+  brandId: number;
+  brandName: string;
+  price: number;
+  stock: number;
+  minStock: number;
+  unit: number;
+  status: number;
+  isFeatured: boolean;
+  updatedAt: string;
+};
+
+export type ProductDetail = Product & {
+  supplierId: number;
+  supplierName: string;
+  costPrice: number;
+  description: string;
+  createdAt: string;
+};
+
+export type ProductListParams = {
+  q?: string;
+  categoryId?: number;
+  brandId?: number;
+  status?: number;
+  stockStatus?: "low" | "out";
+  featured?: boolean;
+  page?: number;
+  pageSize?: number;
+  sort?: "name" | "price" | "stock" | "updatedAt" | "category" | "brand" | "status";
+  dir?: "asc" | "desc";
+};
+
+export type ProductListResponse = {
+  items: Product[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export type ProductStats = {
+  total: number;
+  outOfStock: number;
+  lowStock: number;
+  totalInventoryValue: number;
+};
+
+const buildQuery = (params: Record<string, unknown>) => {
+  const search = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === "") return;
+    search.set(key, String(value));
+  });
+
+  const queryString = search.toString();
+  return queryString ? `?${queryString}` : "";
+};
+
+export const getProducts = (params: ProductListParams = {}) =>
+  request<ProductListResponse>(`/products${buildQuery(params)}`, "GET");
+
+export const getProductStats = () => request<ProductStats>("/products/stats", "GET");
+
+export type CategoryBreakdownItem = {
+  categoryId: number;
+  categoryName: string;
+  categoryColor: string;
+  productCount: number;
+  stockValue: number;
+  healthyCount: number;
+  lowStockCount: number;
+  outOfStockCount: number;
+};
+
+export type BrandBreakdownItem = {
+  brandId: number;
+  brandName: string;
+  productCount: number;
+};
+
+export type SupplierBreakdownItem = {
+  supplierId: number;
+  supplierName: string;
+  productCount: number;
+};
+
+export type StatusBreakdownItem = {
+  status: number;
+  count: number;
+};
+
+export type ProductStatsBreakdown = {
+  totalProducts: number;
+  totalInventoryValue: number;
+  totalCostValue: number;
+  featuredCount: number;
+  recentlyAddedCount: number;
+  healthyStockCount: number;
+  lowStockCount: number;
+  outOfStockCount: number;
+  byCategory: CategoryBreakdownItem[];
+  byBrand: BrandBreakdownItem[];
+  bySupplier: SupplierBreakdownItem[];
+  byStatus: StatusBreakdownItem[];
+};
+
+export const getProductStatsBreakdown = () =>
+  request<ProductStatsBreakdown>("/products/stats/breakdown", "GET");
+
+export const getProductById = (id: number) => request<ProductDetail>(`/products/${id}`, "GET");
+
+export const deleteProduct = (id: number) => request<void>(`/products/${id}`, "DELETE");
+
+export type ProductUpdatePayload = {
+  name: string;
+  sku: string;
+  barcode: string;
+  categoryId: number;
+  brandId: number;
+  supplierId: number;
+  price: number;
+  costPrice: number;
+  stock: number;
+  minStock: number;
+  unit: number;
+  status: number;
+  description: string;
+  isFeatured: boolean;
+};
+
+export const updateProduct = (id: number, payload: ProductUpdatePayload) =>
+  request<Product>(`/products/${id}`, "PUT", payload);
+
+export type ProductCreatePayload = {
+  name: string;
+  sku: string;
+  barcode?: string;
+  categoryId: number;
+  brandId: number;
+  supplierId: number;
+  price: number;
+  costPrice: number;
+  stock: number;
+  minStock: number;
+  unit: number;
+  status: number;
+  description?: string;
+  isFeatured?: boolean;
+};
+
+export const createProduct = (payload: ProductCreatePayload) =>
+  request<Product>("/products", "POST", payload);
+
+export type ActivityLogAction =
+  | "Created"
+  | "Updated"
+  | "Deleted"
+  | "StockIn"
+  | "StockAdjusted"
+  | "PriceChanged"
+  | "CostPriceChanged"
+  | "StatusChanged"
+  | "FeaturedChanged";
+
+export type ActivityLog = {
+  id: number;
+  action: ActivityLogAction;
+  description: string;
+  quantityDelta: number | null;
+  amountKurus: number | null;
+  createdAt: string;
+};
+
+export const getProductLogs = (id: number, limit = 20) =>
+  request<ActivityLog[]>(`/products/${id}/logs?limit=${limit}`, "GET");
+
+export const addProductStockEntry = (id: number, quantity: number) =>
+  request<Product>(`/products/${id}/stock-entries`, "POST", { quantity });
+
+export type StockHistoryPoint = {
+  weekEnding: string;
+  stock: number;
+};
+
+export const getProductStockHistory = (id: number, weeks = 12) =>
+  request<StockHistoryPoint[]>(`/products/${id}/stock-history?weeks=${weeks}`, "GET");

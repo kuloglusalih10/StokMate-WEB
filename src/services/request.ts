@@ -1,6 +1,8 @@
 import axios, { type AxiosError, type AxiosRequestConfig } from "axios";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3000/v1/";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5080";
+
+const AUTH_ENDPOINTS_WITHOUT_SESSION = ["/auth/login", "/auth/refresh"];
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -27,14 +29,61 @@ api.interceptors.request.use(
 
 export type ApiResult<T = unknown> =
   | { res: true; data: T }
-  | { res: false; message: string; code?: string | number };
+  | { res: false; message: string; status?: number };
 
-// Genel amaçlı request fonksiyonu - TrackSem'deki services/request.js ile aynı desen
+type RefreshResponse = {
+  accessToken: string;
+  refreshToken: string;
+};
+
+let pendingRefresh: Promise<boolean> | null = null;
+
+const performRefresh = async (): Promise<boolean> => {
+  const storedRefreshToken = localStorage.getItem("refreshToken");
+
+  if (!storedRefreshToken) {
+    return false;
+  }
+
+  try {
+    const response = await api.post<RefreshResponse>("/auth/refresh", {
+      refreshToken: storedRefreshToken,
+    });
+
+    localStorage.setItem("token", response.data.accessToken);
+    localStorage.setItem("refreshToken", response.data.refreshToken);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const refreshAccessToken = (): Promise<boolean> => {
+  if (!pendingRefresh) {
+    pendingRefresh = performRefresh().finally(() => {
+      pendingRefresh = null;
+    });
+  }
+
+  return pendingRefresh;
+};
+
+const endSession = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("user");
+
+  if (window.location.pathname !== "/giris") {
+    window.location.assign("/giris");
+  }
+};
+
 export const request = async <T = unknown>(
   url: string,
   method: AxiosRequestConfig["method"],
   data: unknown = null,
-  contentType: string = "application/json"
+  contentType: string = "application/json",
+  isRetryAfterRefresh: boolean = false
 ): Promise<ApiResult<T>> => {
   try {
     const config: AxiosRequestConfig = { url, method, headers: {} };
@@ -51,17 +100,31 @@ export const request = async <T = unknown>(
     const response = await api.request<T>(config);
     return { res: true, data: response.data };
   } catch (err) {
-    const error = err as AxiosError<{ code?: string; message?: string }>;
-    console.error("API Request Error:", error);
+    const error = err as AxiosError<unknown>;
+    const status = error.response?.status;
+    const isSessionEndpoint = AUTH_ENDPOINTS_WITHOUT_SESSION.includes(url);
 
-    if (error.response?.data?.code === "TOKEN_EXPIRED") {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-      return { res: false, message: "Session expired", code: "AUTH_ERROR" };
+    if (status === 401 && !isSessionEndpoint) {
+      if (!isRetryAfterRefresh) {
+        const refreshed = await refreshAccessToken();
+
+        if (refreshed) {
+          return request<T>(url, method, data, contentType, true);
+        }
+      }
+
+      endSession();
     }
 
-    const message = error.response?.data?.message || error.message;
-    return { res: false, message, code: error.response?.status };
+    console.error("API Request Error:", error);
+
+    const body = error.response?.data;
+    const message =
+      typeof body === "string" && body.trim().length > 0
+        ? body
+        : error.message;
+
+    return { res: false, message, status };
   }
 };
 

@@ -1,9 +1,23 @@
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route } from "react-router-dom";
+import Login from "../pages/Login";
+import MainLayout from "../layouts";
+import Products from "../pages/Products";
+import ProductDetail from "../pages/ProductDetail";
+import Statistics from "../pages/Statistics";
+import Definitions from "../pages/Definitions";
+import NotFound from "../pages/NotFound";
 
-// Sayfalar eklendikçe <Route> tanımları burada yapılacak.
 const AppRoutes = () => (
   <Routes>
-    {/* <Route path="/" element={<Home />} /> */}
+    <Route path="/giris" element={<Login />} />
+    <Route path="/" element={<MainLayout />}>
+      <Route index element={<Navigate to="/urunler" replace />} />
+      <Route path="urunler" element={<Products />} />
+      <Route path="urunler/:id" element={<ProductDetail />} />
+      <Route path="istatistikler" element={<Statistics />} />
+      <Route path="definitions" element={<Definitions />} />
+    </Route>
+    <Route path="*" element={<NotFound />} />
   </Routes>
 );
 
