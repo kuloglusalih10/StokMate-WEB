@@ -127,3 +127,8 @@ input[type="number"] {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+.ant-menu-inline .ant-menu-item .ant-menu-item-icon,
+.ant-menu-inline .ant-menu-item .anticon {
+  vertical-align: middle;
+}
