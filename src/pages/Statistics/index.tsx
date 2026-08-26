@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { toast } from "react-toastify";
 import {
@@ -7,6 +7,7 @@ import {
   type CategoryBreakdownItem,
 } from "../../services/products";
 import StatisticsLoading from "./loading";
+import { useProductEvents } from "../../hooks/useProductEvents";
 
 import type { MatrixFilter } from "../../types/statistics";
 
@@ -389,22 +390,34 @@ const Statistics = () => {
   const [matrixFilter, setMatrixFilter] = useState<MatrixFilter | null>(null);
   const [isNarrow, setIsNarrow] = useState(() => typeof window !== "undefined" && window.innerWidth < 1180);
 
-  useEffect(() => {
-    const load = async () => {
+  const loadStats = useCallback(async (silent = false) => {
+    if (!silent) {
       setLoading(true);
-      const result = await getProductStatsBreakdown();
+    }
+
+    const result = await getProductStatsBreakdown();
+
+    if (!silent) {
       setLoading(false);
+    }
 
-      if (!result.res) {
+    if (!result.res) {
+      if (!silent) {
         toast.error(result.message);
-        return;
       }
+      return;
+    }
 
-      setData(result.data);
-    };
-
-    load();
+    setData(result.data);
   }, []);
+
+  useEffect(() => {
+    loadStats();
+  }, [loadStats]);
+
+  useProductEvents(() => {
+    loadStats(true);
+  });
 
   useEffect(() => {
     const handleResize = () => setIsNarrow(window.innerWidth < 1180);

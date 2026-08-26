@@ -146,8 +146,26 @@ const NewProductDialog = ({ open, onClose, onCreated }: NewProductDialogProps) =
               >
                 <Input size="large" placeholder="ICE-1010" style={{ fontFamily: DIALOG_MONO }} />
               </Form.Item>
-              <Form.Item name="barcode" label="Barkod">
-                <Input size="large" placeholder="13 haneli EAN" style={{ fontFamily: DIALOG_MONO }} />
+              <Form.Item
+                name="barcode"
+                label="Barkod"
+                rules={[
+                  {
+                    pattern: /^[0-9]{8}$|^[0-9]{13}$/,
+                    message: "Barkod 8 veya 13 haneli rakam olmalı.",
+                  },
+                ]}
+              >
+                <Input
+                  size="large"
+                  placeholder="13 haneli EAN"
+                  maxLength={13}
+                  style={{ fontFamily: DIALOG_MONO }}
+                  onInput={(e) => {
+                    const input = e.target as HTMLInputElement;
+                    input.value = input.value.replace(/[^0-9]/g, "");
+                  }}
+                />
               </Form.Item>
             </div>
           </DialogSection>
@@ -202,6 +220,7 @@ const NewProductDialog = ({ open, onClose, onCreated }: NewProductDialogProps) =
                 <InputNumber
                   size="large"
                   min={0}
+                  max={9999999.99}
                   step={0.01}
                   precision={2}
                   prefix="₺"
@@ -221,6 +240,7 @@ const NewProductDialog = ({ open, onClose, onCreated }: NewProductDialogProps) =
                 <InputNumber
                   size="large"
                   min={0}
+                  max={9999999.99}
                   step={0.01}
                   precision={2}
                   prefix="₺"
@@ -243,7 +263,7 @@ const NewProductDialog = ({ open, onClose, onCreated }: NewProductDialogProps) =
                   { type: "number", min: 0, message: "Stok negatif olamaz." },
                 ]}
               >
-                <InputNumber size="large" min={0} style={{ width: "100%", fontFamily: DIALOG_MONO }} />
+                <InputNumber size="large" min={0} max={999999} precision={0} style={{ width: "100%", fontFamily: DIALOG_MONO }} />
               </Form.Item>
               <Form.Item
                 name="minStock"
@@ -254,7 +274,7 @@ const NewProductDialog = ({ open, onClose, onCreated }: NewProductDialogProps) =
                 ]}
                 extra={<p style={dialogHintStyle}>{thresholdHint}</p>}
               >
-                <InputNumber size="large" min={0} style={{ width: "100%", fontFamily: DIALOG_MONO }} />
+                <InputNumber size="large" min={0} max={999999} precision={0} style={{ width: "100%", fontFamily: DIALOG_MONO }} />
               </Form.Item>
             </div>
           </DialogSection>

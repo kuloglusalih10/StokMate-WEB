@@ -54,7 +54,7 @@ const StockEntryDialog = ({ open, productId, productName, onClose, onAdded }: St
           ]}
           extra={<p style={{ margin: "6px 0 0", fontSize: 11.5, color: DIALOG_COLORS.muted }}>Bu miktar mevcut stoğa eklenir.</p>}
         >
-          <InputNumber size="large" min={1} style={{ width: "100%" }} autoFocus />
+          <InputNumber size="large" min={1} max={999999} precision={0} style={{ width: "100%" }} autoFocus />
         </Form.Item>
       </Form>
     </AppDialog>
