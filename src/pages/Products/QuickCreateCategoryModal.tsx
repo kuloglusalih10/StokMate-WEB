@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Form, Input, ColorPicker } from "antd";
 import { toast } from "react-toastify";
-import { createCategory, type Category } from "../../services/categories";
+import { createCategory } from "../../services/categories";
 import AppDialog from "../../components/AppDialog";
 import { DIALOG_COLORS } from "../../components/dialogTheme";
 import type { QuickCreateCategoryFormValues, QuickCreateCategoryModalProps } from "../../types/products";

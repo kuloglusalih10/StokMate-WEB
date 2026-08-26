@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Form, Input, InputNumber, Select, Switch } from "antd";
 import { toast } from "react-toastify";
-import { createProduct, type Product } from "../../services/products";
+import { createProduct } from "../../services/products";
 import { getCategories, type Category } from "../../services/categories";
 import { getBrands, type Brand } from "../../services/brands";
 import { getSuppliers, type Supplier } from "../../services/suppliers";

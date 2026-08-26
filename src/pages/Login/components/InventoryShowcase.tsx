@@ -43,7 +43,6 @@ const Pop = ({
       animationDelay: delay,
       ...style,
     }}
-    // @ts-expect-error CSS custom properties
     // eslint-disable-next-line react/no-unknown-property
     ref={(el) => {
       if (el) {
