@@ -1249,7 +1249,7 @@ const InventoryShowcase = () => (
       style={{
         display: "flex",
         alignItems: "center",
-        justifyContent: "space-between",
+        justifyContent: "flex-end",
         gap: 18,
         flexWrap: "wrap",
         borderTop: `1px solid ${COLORS.line}`,
@@ -1260,17 +1260,6 @@ const InventoryShowcase = () => (
         fontFamily: MONO,
       }}
     >
-      <div style={{ display: "flex", gap: 22, flexWrap: "wrap" }}>
-        <span>
-          DEĞER <b style={{ color: "#fff", fontWeight: 600 }}>₺544.837</b>
-        </span>
-        <span>
-          RİSKLİ <b style={{ color: "#fff", fontWeight: 600 }}>24</b>
-        </span>
-        <span>
-          MARJ <b style={{ color: "#fff", fontWeight: 600 }}>%22,6</b>
-        </span>
-      </div>
       <span>© 2026 SALİH KULOĞLU</span>
     </footer>
   </aside>
