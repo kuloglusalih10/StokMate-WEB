@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Form, Input } from "antd";
 import { toast } from "react-toastify";
-import { createSupplier, updateSupplier, type Supplier } from "../../services/suppliers";
+import { createSupplier, updateSupplier } from "../../services/suppliers";
 import AppDialog from "../../components/AppDialog";
 import { DialogSection, dialogTwoColStyle } from "../../components/dialogTheme";
 import type { SupplierFormValues, SupplierFormModalProps } from "../../types/definitions";

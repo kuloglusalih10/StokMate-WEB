@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Form, Input } from "antd";
 import { toast } from "react-toastify";
-import { createBrand, type Brand } from "../../services/brands";
+import { createBrand } from "../../services/brands";
 import AppDialog from "../../components/AppDialog";
 import type { QuickCreateBrandFormValues, QuickCreateBrandModalProps } from "../../types/products";
 
