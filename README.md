@@ -24,6 +24,23 @@
 
 ---
 
+> ### ⚡ Gerçek Zamanlı Güncelleme
+>
+> Stok girişi, ürün düzenleme veya silme işlemi başka bir cihaz ya da sekmeden yapılsa bile
+> açık olan sayfa **anında ve yenilenmeden** güncellenir. Altyapıda **Server-Sent Events (SSE)**
+> kullanılır; tarayıcı başına tek bir bağlantı tüm bileşenlere yayın yapar.
+>
+> ```
+> Backend ──── SSE /events/products ────▶ useProductEvents hook
+>                                            │
+>              ┌────────────────────────────┼────────────────────────┐
+>              ▼                            ▼                        ▼
+>        Ürün Listesi               Ürün Detay               İstatistikler
+>       stok badge güncelle     grafik + log yenile       toplam değer yenile
+> ```
+
+---
+
 ## Özellikler
 
 | Modül | Açıklama |
