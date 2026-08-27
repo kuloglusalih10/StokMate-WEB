@@ -64,6 +64,7 @@ const AppDialog = ({
         closable={!saving}
         width={width}
         centered
+        zIndex={1100}
         styles={dialogChromeStyles(maxHeight)}
         closeIcon={<DialogCloseIcon />}
         title={<DialogTitle title={title} subtitle={subtitle} />}
